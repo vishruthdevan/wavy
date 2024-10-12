@@ -174,7 +174,7 @@ func lookupKeyword(word string) TokenType {
 	if exists {
 		return t
 	}
-	return INDENTIFIER
+	return IDENTIFIER
 }
 
 func (lexer *Lexer) peek() rune {
