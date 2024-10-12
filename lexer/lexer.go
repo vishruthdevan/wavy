@@ -26,6 +26,7 @@ func initToken(tokenType TokenType, ch rune) Token {
 	return Token{Type: tokenType, Value: string(ch)}
 }
 
+
 func (lexer *Lexer) NextToken() Token {
 	var t Token
 
@@ -57,7 +58,33 @@ func (lexer *Lexer) NextToken() Token {
 	case ']':
 		t = initToken(RBRACKET, lexer.current)
 	default:
+		if isValidChar(lexer.current) {
+			t.Value = lexer.readWord()
+			t.Type = lookupKeyword(t.Value)
+			return t
+		} 
 	}
 	lexer.advance()
 	return t
+}
+
+
+func isValidChar(ch rune) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '$'
+}
+
+func (lexer *Lexer) readWord() string {
+	start := lexer.position
+	for isValidChar(lexer.current) {
+		lexer.advance()
+	}
+	return lexer.input[start:lexer.position]
+}
+
+func lookupKeyword(word string) TokenType {
+	t, exists := keywords[word]
+	if exists {
+		return t
+	}
+	return INDENTIFIER
 }
