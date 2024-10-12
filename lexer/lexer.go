@@ -1,5 +1,7 @@
 package lexer
 
+import "strings"
+
 type Lexer struct {
 	input        string
 	position     int
@@ -63,7 +65,11 @@ func (lexer *Lexer) NextToken() Token {
 			return t
 		} else if isDigit(lexer.current) {
 			t.Value = lexer.readNumber()
-			t.Type = INTEGER
+			if strings.Contains(t.Value, ".") {
+				t.Type = FLOAT
+			} else {
+				t.Type = INTEGER
+			}
 			return t
 		} else {
 			t.Type = ILLEGAL
@@ -95,6 +101,13 @@ func (lexer *Lexer) readNumber() string {
 	for isDigit(lexer.current) {
 		lexer.advance()
 	}
+	if lexer.current == '.' {
+		lexer.advance()
+		for isDigit(lexer.current) {
+			lexer.advance()
+		}
+	}
+
 	return lexer.input[start:lexer.position]
 }
 
