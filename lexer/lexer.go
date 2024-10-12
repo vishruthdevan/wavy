@@ -11,6 +11,7 @@ type Lexer struct {
 
 func Init(input string) *Lexer {
 	lexer := &Lexer{input: input}
+	lexer.advance()
 	return lexer
 }
 
@@ -60,10 +61,20 @@ func (lexer *Lexer) NextToken() Token {
 		t = initToken(ASTERISK, lexer.current)
 	case '/':
 		t = initToken(SLASH, lexer.current)
+	case '<':
+		t = initToken(LT, lexer.current)
+	case '>':
+		t = initToken(GT, lexer.current)
 	case ',':
 		t = initToken(COMMA, lexer.current)
 	case ';':
 		t = initToken(SEMICOLON, lexer.current)
+	case ':':
+		t = initToken(COLON, lexer.current)
+	case '"':
+		t = initToken(QUOTE, lexer.current)
+	case '\'':
+		t = initToken(SQUOTE, lexer.current)
 	case '(':
 		t = initToken(LPR, lexer.current)
 	case ')':
