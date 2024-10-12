@@ -37,7 +37,21 @@ func (lexer *Lexer) NextToken() Token {
 
 	switch lexer.current {
 	case '=':
-		t = initToken(ASSIGN, lexer.current)
+		if lexer.peek() == '=' {
+			current := lexer.current
+			lexer.advance()
+			t = initToken(EQUALS, current+lexer.current)
+		} else {
+			t = initToken(ASSIGN, lexer.current)
+		}
+	case '!':
+		if lexer.peek() == '=' {
+			current := lexer.current
+			lexer.advance()
+			t = initToken(NOT_EQUALS, current+lexer.current)
+		} else {
+			t = initToken(BANG, lexer.current)
+		}
 	case '+':
 		t = initToken(PLUS, lexer.current)
 	case '-':
@@ -63,7 +77,8 @@ func (lexer *Lexer) NextToken() Token {
 	case ']':
 		t = initToken(RBRACKET, lexer.current)
 	case 0:
-		t = initToken(EOF, lexer.current)
+		t.Type = EOF
+		t.Value = ""
 	default:
 		if isValidChar(lexer.current) {
 			t.Value = lexer.readWord()
@@ -130,4 +145,11 @@ func lookupKeyword(word string) TokenType {
 		return t
 	}
 	return INDENTIFIER
+}
+
+func (lexer *Lexer) peek() rune {
+	if lexer.nextPosition < len(lexer.input) {
+		return rune(lexer.input[lexer.nextPosition])
+	}
+	return 0
 }

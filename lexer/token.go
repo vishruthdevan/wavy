@@ -19,6 +19,10 @@ const (
 	MINUS    = "-"
 	ASTERISK = "*"
 	SLASH    = "/"
+	BANG     = "!"
+
+	EQUALS     = "=="
+	NOT_EQUALS = "!="
 
 	COMMA     = ","
 	SEMICOLON = ";"
@@ -47,7 +51,7 @@ const (
 )
 
 var keywords = map[string]TokenType{
-	"function":      FUNCTION,
+	"function": FUNCTION,
 	"return":   RETURN,
 	"if":       IF,
 	"else":     ELSE,
