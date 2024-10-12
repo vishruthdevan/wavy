@@ -31,6 +31,10 @@ func initToken(tokenType TokenType, ch rune) Token {
 func (lexer *Lexer) NextToken() Token {
 	var t Token
 
+	for isWhitespace(lexer.current) {
+		lexer.advance()
+	}
+
 	switch lexer.current {
 	case '=':
 		t = initToken(ASSIGN, lexer.current)
@@ -88,6 +92,13 @@ func isValidChar(ch rune) bool {
 
 func isDigit(ch rune) bool {
 	return '0' <= ch && ch <= '9'
+}
+
+func isWhitespace(ch rune) bool {
+	if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
+		return true
+	}
+	return false
 }
 
 func (lexer *Lexer) readWord() string {
