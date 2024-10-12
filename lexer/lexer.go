@@ -72,9 +72,11 @@ func (lexer *Lexer) NextToken() Token {
 	case ':':
 		t = initToken(COLON, lexer.current)
 	case '"':
-		t = initToken(QUOTE, lexer.current)
+		t.Type = STRING
+		t.Value = lexer.readString()
 	case '\'':
-		t = initToken(SQUOTE, lexer.current)
+		t.Type = STRING
+		t.Value = lexer.readString()
 	case '(':
 		t = initToken(LPR, lexer.current)
 	case ')':
@@ -148,6 +150,23 @@ func (lexer *Lexer) readNumber() string {
 	}
 
 	return lexer.input[start:lexer.position]
+}
+
+func (lexer *Lexer) readString() string {
+	start := lexer.position
+	if lexer.current == '"' {
+		lexer.advance()
+		for lexer.current != '"' {
+			lexer.advance()
+		}
+	}
+	if lexer.current == '\'' {
+		lexer.advance()
+		for lexer.current != '\'' {
+			lexer.advance()
+		}
+	}
+	return lexer.input[start+1 : lexer.position]
 }
 
 func lookupKeyword(word string) TokenType {

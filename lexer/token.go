@@ -9,7 +9,7 @@ type Token struct {
 
 const (
 	KEYWORD     = "KEYWORD"
-	INDENTIFIER = "INDENTIFIER"
+	IDENTIFIER = "IDENTIFIER"
 	INTEGER     = "INTEGER"
 	FLOAT       = "FLOAT"
 	STRING      = "STRING"
@@ -20,12 +20,15 @@ const (
 	ASTERISK = "*"
 	SLASH    = "/"
 	BANG     = "!"
+	LT       = "<"
+	GT       = ">"
 
 	EQUALS     = "=="
 	NOT_EQUALS = "!="
 
 	COMMA     = ","
 	SEMICOLON = ";"
+	COLON     = ":"
 
 	LPR      = "("
 	RPR      = ")"

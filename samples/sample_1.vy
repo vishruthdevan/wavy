@@ -19,4 +19,4 @@ volumeAdjustedClip = adjustVolume(trimmedClip, db: 40)
 
 finalClip = join(audioClips)
 
-export(appendedClip, "output.wav")
+export(appendedClip, 'output.wav')
