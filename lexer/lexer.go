@@ -58,6 +58,8 @@ func (lexer *Lexer) NextToken() Token {
 		t = initToken(LBRACKET, lexer.current)
 	case ']':
 		t = initToken(RBRACKET, lexer.current)
+	case 0:
+		t = initToken(EOF, lexer.current)
 	default:
 		if isValidChar(lexer.current) {
 			t.Value = lexer.readWord()
