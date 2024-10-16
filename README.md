@@ -7,7 +7,7 @@ A high-level programming language designed for the manipulation of audio files
 | Vishruth Devan | vd2461 | <vd2461@columbia.edu> |
 | -------------- | ------ | --------------------- |
 
-## Installation
+## Installation and Usage
 
 1. Install Docker from <https://docs.docker.com/get-started/get-docker/>
 2. Clone the repository:  
@@ -19,7 +19,7 @@ A high-level programming language designed for the manipulation of audio files
 3. Run the `test-lexer.sh` script:  
 
     ```bash
-    ./test-lexer.sh /wavy/<path-to-sample-file.vy>
+    ./test-lexer.sh /wavy/<path-to-sample-file.vy> 
     ```
 
     If you get a permission denied error while running the script, run the following command and try again:
@@ -33,6 +33,8 @@ A high-level programming language designed for the manipulation of audio files
     ```bash
     ./test-lexer.sh /wavy/samples/sample_1.vy
     ```
+
+5. The expected outputs are the `.out` files in the `samples/expected_outputs/` directory. Running the script will generate `.out` files in the same directory as the input file. For example, if `/wavy/samples/sample_1.vy` was the input, the output will be written to `/wavy/samples/sample_1.vy.out`.
 
 ## Lexical Grammar Definition
 
