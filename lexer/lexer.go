@@ -189,6 +189,7 @@ func (lexer *Lexer) readString() string {
 				lexer.column = startColumn
 				lexer.row = startRow
 				lexer.throwLexicalError("Unterminated string")
+				break
 			}
 		}
 	}
@@ -200,6 +201,7 @@ func (lexer *Lexer) readString() string {
 				lexer.column = startColumn
 				lexer.row = startRow
 				lexer.throwLexicalError("Unterminated string")
+				break
 			}
 		}
 	}
