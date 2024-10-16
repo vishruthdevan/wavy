@@ -1,16 +1,21 @@
 package lexer
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type Lexer struct {
 	input        string
 	position     int
+	row          int
+	column       int
 	nextPosition int
 	current      rune
 }
 
 func Init(input string) *Lexer {
-	lexer := &Lexer{input: input}
+	lexer := &Lexer{input: input, row: 1, column: 1, nextPosition: 0}
 	lexer.advance()
 	return lexer
 }
@@ -22,6 +27,11 @@ func (lexer *Lexer) advance() {
 		lexer.current = 0
 	}
 	lexer.position = lexer.nextPosition
+	lexer.column += 1
+	if lexer.current == '\n' {
+		lexer.row += 1
+		lexer.column = 0
+	}
 	lexer.nextPosition += 1
 }
 
@@ -109,6 +119,7 @@ func (lexer *Lexer) NextToken() Token {
 		} else {
 			t.Type = ILLEGAL
 			t.Value = string(lexer.current)
+			lexer.throwLexicalError("Illegal character \"" + t.Value + "\"")
 		}
 	}
 	lexer.advance()
@@ -132,25 +143,35 @@ func isWhitespace(ch rune) bool {
 
 func (lexer *Lexer) readWord() string {
 	start := lexer.position
-	if isValidChar(lexer.current) {
+	for isValidChar(lexer.current) || isDigit(lexer.current) {
 		lexer.advance()
-		for isValidChar(lexer.current) || isDigit(lexer.current) {
-			lexer.advance()
-		}
 	}
 	return lexer.input[start:lexer.position]
 }
 
 func (lexer *Lexer) readNumber() string {
 	start := lexer.position
+
 	for isDigit(lexer.current) {
 		lexer.advance()
 	}
 	if lexer.current == '.' {
 		lexer.advance()
+
+		if !isDigit(lexer.current) {
+			lexer.throwLexicalError("Invalid number")
+		}
+
 		for isDigit(lexer.current) {
 			lexer.advance()
 		}
+	}
+	if lexer.current == '.' {
+		lexer.throwLexicalError("Invalid number")
+	}
+
+	if isValidChar(lexer.current) {
+		lexer.throwLexicalError("Invalid number")
 	}
 
 	return lexer.input[start:lexer.position]
@@ -158,16 +179,28 @@ func (lexer *Lexer) readNumber() string {
 
 func (lexer *Lexer) readString() string {
 	start := lexer.position
+	startColumn := lexer.column
+	startRow := lexer.row
 	if lexer.current == '"' {
 		lexer.advance()
 		for lexer.current != '"' {
 			lexer.advance()
+			if lexer.current == 0 {
+				lexer.column = startColumn
+				lexer.row = startRow
+				lexer.throwLexicalError("Unterminated string")
+			}
 		}
 	}
 	if lexer.current == '\'' {
 		lexer.advance()
 		for lexer.current != '\'' {
 			lexer.advance()
+			if lexer.current == 0 {
+				lexer.column = startColumn
+				lexer.row = startRow
+				lexer.throwLexicalError("Unterminated string")
+			}
 		}
 	}
 	return lexer.input[start+1 : lexer.position]
@@ -186,4 +219,8 @@ func (lexer *Lexer) peek() rune {
 		return rune(lexer.input[lexer.nextPosition])
 	}
 	return 0
+}
+
+func (lexer *Lexer) throwLexicalError(message string) {
+	fmt.Printf("Lexical error at line %d, position %d: %s\n", lexer.row, lexer.column, message)
 }
