@@ -1,14 +1,23 @@
 package lexer
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
 	"testing"
 )
 
+var fileName string
+
+func init() {
+	flag.StringVar(&fileName, "file", "../samples/sample_5.vy", "sample .vy file to process")
+}
+
 func TestNextToken(t *testing.T) {
-	file, err := os.Open("../samples/sample_1.vy")
+	flag.Parse()
+
+	file, err := os.Open(fileName)
 	if err != nil {
 		t.Fatalf("error opening file: %v", err)
 	}

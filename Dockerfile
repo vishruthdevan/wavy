@@ -10,4 +10,4 @@ COPY . .
 
 WORKDIR /wavy/lexer
 
-CMD ["go", "test"]
+ENTRYPOINT ["go", "test", "-v", "./...", "-args"]
