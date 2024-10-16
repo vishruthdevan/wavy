@@ -11,7 +11,7 @@ import (
 var fileName string
 
 func init() {
-	flag.StringVar(&fileName, "file", "../samples/sample_5.vy", "sample .vy file to process")
+	flag.StringVar(&fileName, "file", "../samples/sample_1.vy", "sample .vy file to process")
 }
 
 func TestNextToken(t *testing.T) {
@@ -30,6 +30,8 @@ func TestNextToken(t *testing.T) {
 
 	lexer := Init(string(content))
 
+	fmt.Print("\n==== Lexer Output Start ====\n\n")
+
 	for {
 		token := lexer.NextToken()
 		fmt.Printf("<%s, \"%s\">\n", token.Type, token.Value)
@@ -37,4 +39,6 @@ func TestNextToken(t *testing.T) {
 			break
 		}
 	}
+
+	fmt.Print("\n==== Lexer Output End ====\n\n")
 }

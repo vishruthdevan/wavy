@@ -222,5 +222,5 @@ func (lexer *Lexer) peek() rune {
 }
 
 func (lexer *Lexer) throwLexicalError(message string) {
-	fmt.Printf("Lexical error at line %d, position %d: %s\n", lexer.row, lexer.column, message)
+	fmt.Printf("\nLexical error at line %d, position %d: %s\n\n", lexer.row, lexer.column, message)
 }
