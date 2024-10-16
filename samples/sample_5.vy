@@ -9,5 +9,5 @@ if (format == 'wav') {
 } else if (format == 'aac') {
     export(aud1, 'output1.aac')
 } else {
-    print("Invalid format")
+    print("Invalid format)
 }
