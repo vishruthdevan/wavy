@@ -41,7 +41,8 @@ func (lexer *Lexer) NextToken() Token {
 		if lexer.peek() == '=' {
 			current := lexer.current
 			lexer.advance()
-			t = initToken(EQUALS, current+lexer.current)
+			t.Type = EQUALS
+			t.Value = string(current) + string(lexer.current)
 		} else {
 			t = initToken(ASSIGN, lexer.current)
 		}
@@ -131,8 +132,11 @@ func isWhitespace(ch rune) bool {
 
 func (lexer *Lexer) readWord() string {
 	start := lexer.position
-	for isValidChar(lexer.current) {
+	if isValidChar(lexer.current) {
 		lexer.advance()
+		for isValidChar(lexer.current) || isDigit(lexer.current) {
+			lexer.advance()
+		}
 	}
 	return lexer.input[start:lexer.position]
 }
