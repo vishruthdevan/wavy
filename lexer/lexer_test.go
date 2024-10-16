@@ -5,19 +5,23 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
-var fileName string
+var filePath string
 
 func init() {
-	flag.StringVar(&fileName, "file", "../samples/sample_1.vy", "sample .vy file to process")
+	flag.StringVar(&filePath, "file", "../samples/sample_1.vy", "sample .vy file to process")
 }
 
 func TestNextToken(t *testing.T) {
 	flag.Parse()
 
-	file, err := os.Open(fileName)
+	directory := filepath.Dir(filePath)
+	fileName := filepath.Base(filePath)
+
+	file, err := os.Open(filepath.Clean(filePath))
 	if err != nil {
 		t.Fatalf("error opening file: %v", err)
 	}
@@ -30,11 +34,18 @@ func TestNextToken(t *testing.T) {
 
 	lexer := Init(string(content))
 
+	output_file, err := os.Create(filepath.Join(directory, fileName+".out"))
+	if err != nil {
+		t.Fatalf("error creating output file: %v", err)
+	}
+	defer output_file.Close()
+
 	fmt.Print("\n==== Lexer Output Start ====\n\n")
 
 	for {
 		token := lexer.NextToken()
 		fmt.Printf("<%s, \"%s\">\n", token.Type, token.Value)
+		output_file.WriteString(fmt.Sprintf("<%s, \"%s\">\n", token.Type, token.Value))
 		if token.Type == EOF {
 			break
 		}
