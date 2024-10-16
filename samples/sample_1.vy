@@ -1,22 +1,10 @@
-audioFiles = ["input1.wav", "input2.wav", "input3.wav"]
-audioClips = []
+aud1 = load("input1.wav")
+aud2 = load("input2.wav")
 
-for (file in audioFiles) {
-clip = load(file)
-fadeIn(clip, duration: 3.0)
-audioClips.append(clip)
-}
+aud1 = fadeIn(aud1, duration: 3.0)
+aud2 = fadeOut(aud2, duration: 3.0)
 
-duration = getDuration(audioClips[0])
+aud1 = trim(aud1, start: 5.0, end: 30.0)
+aud2 = trim(aud2, start: 5.0, end: 30.0)
 
-if (duration > 30.0) {
-trimmedClip = trim(audioClips[0], start: 5.0, end: 30.0)
-} else {
-trimmedClip = trim(audioClips[0], start: 5.0, end: duration)
-}
-
-volumeAdjustedClip = adjustVolume(trimmedClip, db: 40)
-
-finalClip = join(audioClips)
-
-export(appendedClip, 'output.wav')
+res = join(aud1, aud2)
