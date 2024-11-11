@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"wavy/lexer"
 )
 
@@ -19,20 +18,6 @@ func Init(lexer *lexer.Lexer) *Parser {
 	return parser
 }
 
-func (parser *Parser) Errors() []string {
-	return parser.errors
-}
-
-func (parser *Parser) peekError(t lexer.TokenType) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, parser.peekToken.Type)
-	parser.errors = append(parser.errors, msg)
-}
-
-func (parser *Parser) nextToken() {
-	parser.currentToken = parser.peekToken
-	parser.peekToken = parser.lexer.NextToken()
-}
-
 func (p *Parser) ParseProgram() *Program {
 	program := &Program{}
 	program.Statements = []Statement{}
@@ -48,25 +33,39 @@ func (p *Parser) ParseProgram() *Program {
 
 func (p *Parser) parseStatement() Statement {
 	switch p.currentToken.Type {
+	case lexer.IDENTIFIER:
+		return p.parseAssignmentStatement()
+	case lexer.RETURN:
+		return p.parseReturnStatement()
 	default:
 		return nil
 	}
 }
 
-func (p *Parser) isCurrentToken(t lexer.TokenType) bool {
-	return p.currentToken.Type == t
-}
+func (p *Parser) parseAssignmentStatement() *AssignmentStatement {
+	stmt := &AssignmentStatement{}
 
-func (p *Parser) isPeekToken(t lexer.TokenType) bool {
-	return p.peekToken.Type == t
-}
+	stmt.Name = &Identifier{Token: p.currentToken, Value: p.currentToken.Value}
 
-func (p *Parser) peek(t lexer.TokenType) bool {
-	if p.isPeekToken(t) {
-		p.nextToken()
-		return true
-	} else {
-		p.peekError(t)
-		return false
+	if !p.peek(lexer.ASSIGN) {
+		return nil
 	}
+
+	for !p.isCurrentToken(lexer.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseReturnStatement() *ReturnStatement {
+	stmt := &ReturnStatement{Token: p.currentToken}
+
+	p.nextToken()
+
+	for !p.isCurrentToken(lexer.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
 }
