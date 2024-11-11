@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bytes"
+	"wavy/lexer"
 )
 
 type Node interface {
@@ -39,3 +40,12 @@ func (program *Program) String() string {
 
 	return out.String()
 }
+
+type Identifier struct {
+	Token lexer.Token
+	Value string
+}
+
+func (i *Identifier) expressionNode()    {}
+func (i *Identifier) TokenValue() string { return i.Token.Value }
+func (i *Identifier) String() string     { return i.Value }
