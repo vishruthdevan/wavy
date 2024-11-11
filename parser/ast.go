@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bytes"
+	"strings"
 	"wavy/lexer"
 )
 
@@ -193,4 +194,25 @@ func (bs *BlockStatement) String() string {
 	return out.String()
 }
 
+type FunctionLiteral struct {
+	Token      lexer.Token
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
 
+func (fl *FunctionLiteral) expressionNode()    {}
+func (fl *FunctionLiteral) TokenValue() string { return fl.Token.Value }
+func (fl *FunctionLiteral) String() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, p := range fl.Parameters {
+		params = append(params, p.String())
+	}
+	out.WriteString(fl.TokenValue())
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") ")
+	out.WriteString(fl.Body.String())
+	return out.String()
+}

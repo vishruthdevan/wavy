@@ -110,6 +110,7 @@ func Init(l *lexer.Lexer) *Parser {
 	parser.registerPrefix(lexer.FALSE, parser.parseBoolean)
 	parser.registerPrefix(lexer.LPR, parser.parseGroupedExpression)
 	parser.registerPrefix(lexer.IF, parser.parseIfExpression)
+	parser.registerPrefix(lexer.FUNCTION, parser.parseFunctionLiteral)
 
 	parser.infixParseFns = make(map[lexer.TokenType]infixParseFn)
 	parser.registerInfix(lexer.PLUS, parser.parseInfixExpression)
@@ -301,4 +302,49 @@ func (p *Parser) parseBlockStatement() *BlockStatement {
 		p.nextToken()
 	}
 	return block
+}
+
+func (p *Parser) parseFunctionLiteral() Expression {
+	literal := &FunctionLiteral{Token: p.currentToken}
+
+	if !p.peek(lexer.LPR) {
+		return nil
+	}
+
+	literal.Parameters = p.parseFunctionParameters()
+
+	if !p.peek(lexer.LBRACE) {
+		return nil
+	}
+
+	literal.Body = p.parseBlockStatement()
+
+	return literal
+}
+
+func (p *Parser) parseFunctionParameters() []*Identifier {
+	identifiers := []*Identifier{}
+
+	if p.isPeekToken(lexer.RPR) {
+		p.nextToken()
+		return identifiers
+	}
+
+	p.nextToken()
+
+	ident := &Identifier{Token: p.currentToken, Value: p.currentToken.Value}
+	identifiers = append(identifiers, ident)
+
+	for p.isPeekToken(lexer.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		ident := &Identifier{Token: p.currentToken, Value: p.currentToken.Value}
+		identifiers = append(identifiers, ident)
+	}
+
+	if !p.peek(lexer.RPR) {
+		return nil
+	}
+
+	return identifiers
 }
