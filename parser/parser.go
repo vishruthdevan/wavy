@@ -5,6 +5,17 @@ import (
 	"wavy/lexer"
 )
 
+const (
+	_ int = iota
+	LOWEST
+	EQUALS
+	LESSGREATER
+	SUM
+	PRODUCT
+	PREFIX
+	CALL
+)
+
 type Parser struct {
 	lexer          *lexer.Lexer
 	currentToken   lexer.Token
@@ -58,8 +69,16 @@ func (p *Parser) peek(t lexer.TokenType) bool {
 	}
 }
 
-func Init(lexer *lexer.Lexer) *Parser {
-	parser := &Parser{lexer: lexer, errors: []string{}}
+func (p *Parser) parseIdentifier() Expression {
+	return &Identifier{Token: p.currentToken, Value: p.currentToken.Value}
+}
+
+func Init(l *lexer.Lexer) *Parser {
+	parser := &Parser{lexer: l, errors: []string{}}
+
+	parser.prefixParseFns = make(map[lexer.TokenType]prefixParseFn)
+	parser.registerPrefix(lexer.IDENTIFIER, parser.parseIdentifier)
+
 	parser.nextToken()
 	parser.nextToken()
 	return parser
@@ -80,30 +99,30 @@ func (p *Parser) ParseProgram() *Program {
 
 func (p *Parser) parseStatement() Statement {
 	switch p.currentToken.Type {
-	case lexer.IDENTIFIER:
-		return p.parseAssignmentStatement()
+	// case lexer.IDENTIFIER:
+	// 	return p.parseAssignmentStatement()
 	case lexer.RETURN:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
-func (p *Parser) parseAssignmentStatement() *AssignmentStatement {
-	stmt := &AssignmentStatement{}
+// func (p *Parser) parseAssignmentStatement() *AssignmentStatement {
+// 	stmt := &AssignmentStatement{}
 
-	stmt.Name = &Identifier{Token: p.currentToken, Value: p.currentToken.Value}
+// 	stmt.Name = &Identifier{Token: p.currentToken, Value: p.currentToken.Value}
 
-	if !p.peek(lexer.ASSIGN) {
-		return nil
-	}
+// 	if !p.peek(lexer.ASSIGN) {
+// 		return nil
+// 	}
 
-	for !p.isCurrentToken(lexer.SEMICOLON) {
-		p.nextToken()
-	}
+// 	for !p.isCurrentToken(lexer.SEMICOLON) {
+// 		p.nextToken()
+// 	}
 
-	return stmt
-}
+// 	return stmt
+// }
 
 func (p *Parser) parseReturnStatement() *ReturnStatement {
 	stmt := &ReturnStatement{Token: p.currentToken}
@@ -115,4 +134,22 @@ func (p *Parser) parseReturnStatement() *ReturnStatement {
 	}
 
 	return stmt
+}
+
+func (p *Parser) parseExpressionStatement() *ExpressionStatement {
+	stmt := &ExpressionStatement{Token: p.currentToken}
+	stmt.Expression = p.parseExpression(LOWEST)
+	if p.isPeekToken(lexer.SEMICOLON) {
+		p.nextToken()
+	}
+	return stmt
+}
+
+func (p *Parser) parseExpression(precedence int) Expression {
+	prefix := p.prefixParseFns[p.currentToken.Type]
+	if prefix == nil {
+		return nil
+	}
+	leftExp := prefix()
+	return leftExp
 }
