@@ -60,7 +60,8 @@ func (lexer *Lexer) NextToken() Token {
 		if lexer.peek() == '=' {
 			current := lexer.current
 			lexer.advance()
-			t = initToken(NOT_EQUALS, current+lexer.current)
+			t.Type = NOT_EQUALS
+			t.Value = string(current) + string(lexer.current)
 		} else {
 			t = initToken(BANG, lexer.current)
 		}
