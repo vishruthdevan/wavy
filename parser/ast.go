@@ -87,3 +87,16 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
+type ExpressionStatement struct {
+	Token      lexer.Token
+	Expression Expression
+}
+
+func (es *ExpressionStatement) statementNode()     {}
+func (es *ExpressionStatement) TokenValue() string { return es.Token.Value }
+func (es *ExpressionStatement) String() string {
+	if es.Expression != nil {
+		return es.Expression.String()
+	}
+	return ""
+}
