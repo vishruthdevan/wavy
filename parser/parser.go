@@ -174,6 +174,8 @@ func (p *Parser) parseReturnStatement() *ReturnStatement {
 
 	p.nextToken()
 
+	stmt.ReturnValue = p.parseExpression(LOWEST)
+
 	for !p.isCurrentToken(lexer.SEMICOLON) {
 		p.nextToken()
 	}
