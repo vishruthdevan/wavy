@@ -100,3 +100,29 @@ func (es *ExpressionStatement) String() string {
 	}
 	return ""
 }
+
+type IntegerValue struct {
+	Token lexer.Token
+	Value int64
+}
+
+func (il *IntegerValue) expressionNode()    {}
+func (il *IntegerValue) TokenValue() string { return il.Token.Value }
+func (il *IntegerValue) String() string     { return il.Token.Value }
+
+type PrefixExpression struct {
+	Token    lexer.Token // The prefix token, e.g. !
+	Operator string
+	Right    Expression
+}
+
+func (pe *PrefixExpression) expressionNode()    {}
+func (pe *PrefixExpression) TokenValue() string { return pe.Token.Value }
+func (pe *PrefixExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(pe.Operator)
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+	return out.String()
+}

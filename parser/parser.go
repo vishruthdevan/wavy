@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 	"wavy/lexer"
 )
 
@@ -78,6 +79,10 @@ func Init(l *lexer.Lexer) *Parser {
 
 	parser.prefixParseFns = make(map[lexer.TokenType]prefixParseFn)
 	parser.registerPrefix(lexer.IDENTIFIER, parser.parseIdentifier)
+	parser.registerPrefix(lexer.INTEGER, parser.parseIntegerValue)
+
+	parser.registerPrefix(lexer.BANG, parser.parsePrefixExpression)
+	parser.registerPrefix(lexer.MINUS, parser.parsePrefixExpression)
 
 	parser.nextToken()
 	parser.nextToken()
@@ -148,8 +153,36 @@ func (p *Parser) parseExpressionStatement() *ExpressionStatement {
 func (p *Parser) parseExpression(precedence int) Expression {
 	prefix := p.prefixParseFns[p.currentToken.Type]
 	if prefix == nil {
+		p.noPrefixParseFnError(p.currentToken.Type)
 		return nil
 	}
 	leftExp := prefix()
 	return leftExp
+}
+
+func (p *Parser) parseIntegerValue() Expression {
+	lit := &IntegerValue{Token: p.currentToken}
+	value, err := strconv.ParseInt(p.currentToken.Value, 0, 64)
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as integer", p.currentToken.Value)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+	lit.Value = value
+	return lit
+}
+
+func (p *Parser) noPrefixParseFnError(t lexer.TokenType) {
+	msg := fmt.Sprintf("no prefix parse function for %s found", t)
+	p.errors = append(p.errors, msg)
+}
+
+func (p *Parser) parsePrefixExpression() Expression {
+	expression := &PrefixExpression{
+		Token:    p.currentToken,
+		Operator: p.currentToken.Value,
+	}
+	p.nextToken()
+	expression.Right = p.parseExpression(PREFIX)
+	return expression
 }
