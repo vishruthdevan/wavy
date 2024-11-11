@@ -68,3 +68,22 @@ func (as *AssignmentStatement) String() string {
 	out.WriteString(";")
 	return out.String()
 }
+
+type ReturnStatement struct {
+	Token       lexer.Token
+	ReturnValue Expression
+}
+
+func (rs *ReturnStatement) statementNode()     {}
+func (rs *ReturnStatement) TokenValue() string { return rs.Token.Value }
+func (rs *ReturnStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(rs.TokenValue() + " ")
+	if rs.ReturnValue != nil {
+		out.WriteString(rs.ReturnValue.String())
+	}
+	out.WriteString(";")
+	return out.String()
+}
+
