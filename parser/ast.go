@@ -49,3 +49,22 @@ type Identifier struct {
 func (i *Identifier) expressionNode()    {}
 func (i *Identifier) TokenValue() string { return i.Token.Value }
 func (i *Identifier) String() string     { return i.Value }
+
+type AssignmentStatement struct {
+	Name  *Identifier
+	Value Expression
+}
+
+func (as *AssignmentStatement) statementNode()     {}
+func (as *AssignmentStatement) TokenValue() string { return "" }
+func (as *AssignmentStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(as.Name.String())
+	out.WriteString(" = ")
+	if as.Value != nil {
+		out.WriteString(as.Value.String())
+	}
+	out.WriteString(";")
+	return out.String()
+}
