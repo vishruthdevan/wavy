@@ -109,6 +109,8 @@ func Init(l *lexer.Lexer) *Parser {
 	parser.registerPrefix(lexer.TRUE, parser.parseBoolean)
 	parser.registerPrefix(lexer.FALSE, parser.parseBoolean)
 	parser.registerPrefix(lexer.LPR, parser.parseGroupedExpression)
+	parser.registerPrefix(lexer.IF, parser.parseIfExpression)
+
 	parser.infixParseFns = make(map[lexer.TokenType]infixParseFn)
 	parser.registerInfix(lexer.PLUS, parser.parseInfixExpression)
 	parser.registerInfix(lexer.MINUS, parser.parseInfixExpression)
@@ -254,4 +256,49 @@ func (p *Parser) parseGroupedExpression() Expression {
 		return nil
 	}
 	return exp
+}
+
+func (p *Parser) parseIfExpression() Expression {
+	expression := &IfExpression{Token: p.currentToken}
+
+	if !p.peek(lexer.LPR) {
+		return nil
+	}
+
+	p.nextToken()
+	expression.Condition = p.parseExpression(LOWEST)
+
+	if !p.peek(lexer.RPR) {
+		return nil
+	}
+
+	if !p.peek(lexer.LBRACE) {
+		return nil
+	}
+
+	expression.Consequence = p.parseBlockStatement()
+
+	if p.isPeekToken(lexer.ELSE) {
+		p.nextToken()
+		if !p.peek(lexer.LBRACE) {
+			return nil
+		}
+		expression.Alternative = p.parseBlockStatement()
+	}
+
+	return expression
+}
+
+func (p *Parser) parseBlockStatement() *BlockStatement {
+	block := &BlockStatement{Token: p.currentToken}
+	block.Statements = []Statement{}
+	p.nextToken()
+	for !p.isCurrentToken(lexer.RBRACE) && !p.isCurrentToken(lexer.EOF) {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt)
+		}
+		p.nextToken()
+	}
+	return block
 }

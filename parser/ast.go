@@ -154,3 +154,43 @@ type Boolean struct {
 func (b *Boolean) expressionNode()    {}
 func (b *Boolean) TokenValue() string { return b.Token.Value }
 func (b *Boolean) String() string     { return b.Token.Value }
+
+type IfExpression struct {
+	Token       lexer.Token
+	Condition   Expression
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+}
+
+func (ie *IfExpression) expressionNode()    {}
+func (ie *IfExpression) TokenValue() string { return ie.Token.Value }
+func (ie *IfExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("if")
+	out.WriteString(ie.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ie.Consequence.String())
+	if ie.Alternative != nil {
+		out.WriteString("else ")
+		out.WriteString(ie.Alternative.String())
+	}
+	return out.String()
+}
+
+type BlockStatement struct {
+	Token      lexer.Token
+	Statements []Statement
+}
+
+func (bs *BlockStatement) statementNode()     {}
+func (bs *BlockStatement) TokenValue() string { return bs.Token.Value }
+func (bs *BlockStatement) String() string {
+	var out bytes.Buffer
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
+}
+
+
