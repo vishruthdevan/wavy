@@ -26,6 +26,7 @@ var precedences = map[lexer.TokenType]int{
 	lexer.MINUS:      SUM,
 	lexer.SLASH:      PRODUCT,
 	lexer.ASTERISK:   PRODUCT,
+	lexer.LPR:        CALL,
 }
 
 type Parser struct {
@@ -121,6 +122,7 @@ func Init(l *lexer.Lexer) *Parser {
 	parser.registerInfix(lexer.NOT_EQUALS, parser.parseInfixExpression)
 	parser.registerInfix(lexer.LT, parser.parseInfixExpression)
 	parser.registerInfix(lexer.GT, parser.parseInfixExpression)
+	parser.registerInfix(lexer.LPR, parser.parseCallExpression)
 
 	parser.nextToken()
 	parser.nextToken()
@@ -347,4 +349,34 @@ func (p *Parser) parseFunctionParameters() []*Identifier {
 	}
 
 	return identifiers
+}
+
+func (p *Parser) parseCallExpression(function Expression) Expression {
+	exp := &CallExpression{Token: p.currentToken, Function: function}
+	exp.Arguments = p.parseCallArguments()
+	return exp
+}
+
+func (p *Parser) parseCallArguments() []Expression {
+	args := []Expression{}
+
+	if p.isPeekToken(lexer.RPR) {
+		p.nextToken()
+		return args
+	}
+
+	p.nextToken()
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.isPeekToken(lexer.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.peek(lexer.RPR) {
+		return nil
+	}
+
+	return args
 }
