@@ -145,3 +145,12 @@ func (oe *InfixExpression) String() string {
 	out.WriteString(")")
 	return out.String()
 }
+
+type Boolean struct {
+	Token lexer.Token
+	Value bool
+}
+
+func (b *Boolean) expressionNode()    {}
+func (b *Boolean) TokenValue() string { return b.Token.Value }
+func (b *Boolean) String() string     { return b.Token.Value }
