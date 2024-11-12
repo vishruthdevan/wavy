@@ -9,6 +9,7 @@ import (
 const (
 	_ int = iota
 	LOWEST
+	ASSIGN
 	EQUALS
 	LESSGREATER
 	SUM
@@ -18,6 +19,7 @@ const (
 )
 
 var precedences = map[lexer.TokenType]int{
+	lexer.ASSIGN:     ASSIGN,
 	lexer.EQUALS:     EQUALS,
 	lexer.NOT_EQUALS: EQUALS,
 	lexer.LT:         LESSGREATER,
@@ -112,8 +114,10 @@ func Init(l *lexer.Lexer) *Parser {
 	parser.registerPrefix(lexer.LPR, parser.parseGroupedExpression)
 	parser.registerPrefix(lexer.IF, parser.parseIfExpression)
 	parser.registerPrefix(lexer.FUNCTION, parser.parseFunctionLiteral)
+	parser.registerPrefix(lexer.FOR, parser.parseForLoopExpression)
 
 	parser.infixParseFns = make(map[lexer.TokenType]infixParseFn)
+	parser.registerInfix(lexer.ASSIGN, parser.parseAssignExpression)
 	parser.registerInfix(lexer.PLUS, parser.parseInfixExpression)
 	parser.registerInfix(lexer.MINUS, parser.parseInfixExpression)
 	parser.registerInfix(lexer.SLASH, parser.parseInfixExpression)
@@ -381,4 +385,41 @@ func (p *Parser) parseCallArguments() []Expression {
 	}
 
 	return args
+}
+
+func (p *Parser) parseForLoopExpression() Expression {
+	expression := &ForLoopExpression{Token: p.currentToken}
+	if !p.peek(lexer.LPR) {
+		return nil
+	}
+	p.nextToken()
+	expression.Condition = p.parseExpression(LOWEST)
+	if !p.peek(lexer.RPR) {
+		return nil
+	}
+	if !p.peek(lexer.LBRACE) {
+		return nil
+	}
+	expression.Consequence = p.parseBlockStatement()
+	return expression
+}
+
+func (p *Parser) parseAssignExpression(name Expression) Expression {
+	stmt := &AssignmentStatement{Token: p.currentToken}
+	if n, ok := name.(*Identifier); ok {
+		stmt.Name = n
+	} else {
+		msg := "expected assign token to be IDENT, got null instead"
+
+		if name != nil {
+			msg = fmt.Sprintf("expected assign token to be IDENT, got %s instead", name.TokenValue())
+		}
+		p.errors = append(p.errors, msg)
+	}
+
+	p.nextToken()
+	stmt.Operator = "="
+
+	stmt.Value = p.parseExpression(LOWEST)
+	return stmt
 }

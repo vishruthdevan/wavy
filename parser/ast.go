@@ -52,20 +52,21 @@ func (i *Identifier) TokenValue() string { return i.Token.Value }
 func (i *Identifier) String() string     { return i.Value }
 
 type AssignmentStatement struct {
-	Name  *Identifier
-	Value Expression
+	Token    lexer.Token
+	Name     *Identifier
+	Operator string
+	Value    Expression
 }
 
+func (as *AssignmentStatement) expressionNode()    {}
 func (as *AssignmentStatement) statementNode()     {}
-func (as *AssignmentStatement) TokenValue() string { return "" }
+func (as *AssignmentStatement) TokenValue() string { return as.Token.Value }
+
 func (as *AssignmentStatement) String() string {
 	var out bytes.Buffer
-
 	out.WriteString(as.Name.String())
-	out.WriteString(" = ")
-	if as.Value != nil {
-		out.WriteString(as.Value.String())
-	}
+	out.WriteString(" " + as.Operator + " ")
+	out.WriteString(as.Value.String())
 	out.WriteString(";")
 	return out.String()
 }
@@ -238,5 +239,23 @@ func (ce *CallExpression) String() string {
 	out.WriteString(strings.Join(args, ", "))
 	out.WriteString(")")
 
+	return out.String()
+}
+
+type ForLoopExpression struct {
+	Token       lexer.Token
+	Condition   Expression
+	Consequence *BlockStatement
+}
+
+func (fle *ForLoopExpression) expressionNode()    {}
+func (fle *ForLoopExpression) TokenValue() string { return fle.Token.Value }
+func (fle *ForLoopExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("for (")
+	out.WriteString(fle.Condition.String())
+	out.WriteString(" ) {")
+	out.WriteString(fle.Consequence.String())
+	out.WriteString("}")
 	return out.String()
 }
