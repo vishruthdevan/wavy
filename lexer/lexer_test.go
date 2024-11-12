@@ -50,6 +50,14 @@ func TestLexerOutput(t *testing.T) {
 			break
 		}
 	}
+	if lexer.errors != nil {
+		fmt.Printf("lexer has %d error(s):\n", len(lexer.errors))
+		output_file.WriteString(fmt.Sprintf("lexer has %d error(s):\n", len(lexer.errors)))
+		for _, msg := range lexer.errors {
+			fmt.Println(msg)
+			output_file.WriteString(msg + "\n")
+		}
+	}
 
 	fmt.Print("\n==== Lexer Output End ====\n\n")
 }

@@ -11,16 +11,14 @@
 <ASSIGN, "=">
 <LBRACKET, "[">
 <RBRACKET, "]">
-<FOR, "for">
-<LPR, "(">
+<FOREACH, "foreach">
 <IDENTIFIER, "file">
 <IN, "in">
 <IDENTIFIER, "audioFiles">
-<RPR, ")">
 <LBRACE, "{">
 <IDENTIFIER, "clip">
 <ASSIGN, "=">
-<LOAD, "load">
+<IDENTIFIER, "load">
 <LPR, "(">
 <IDENTIFIER, "file">
 <RPR, ")">
@@ -28,8 +26,6 @@
 <LPR, "(">
 <IDENTIFIER, "clip">
 <COMMA, ",">
-<IDENTIFIER, "duration">
-<COLON, ":">
 <FLOAT, "3.0">
 <RPR, ")">
 <IDENTIFIER, "append">
