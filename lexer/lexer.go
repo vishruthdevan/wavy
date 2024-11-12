@@ -8,14 +8,14 @@ import (
 type Lexer struct {
 	input        string
 	position     int
-	row          int
-	column       int
+	Row          int
+	Column       int
 	nextPosition int
 	current      rune
 }
 
 func Init(input string) *Lexer {
-	lexer := &Lexer{input: input, row: 1, column: 1, nextPosition: 0}
+	lexer := &Lexer{input: input, Row: 1, Column: 1, nextPosition: 0}
 	lexer.advance()
 	return lexer
 }
@@ -27,10 +27,10 @@ func (lexer *Lexer) advance() {
 		lexer.current = 0
 	}
 	lexer.position = lexer.nextPosition
-	lexer.column += 1
+	lexer.Column += 1
 	if lexer.current == '\n' {
-		lexer.row += 1
-		lexer.column = 0
+		lexer.Row += 1
+		lexer.Column = 0
 	}
 	lexer.nextPosition += 1
 }
@@ -180,15 +180,15 @@ func (lexer *Lexer) readNumber() string {
 
 func (lexer *Lexer) readString() string {
 	start := lexer.position
-	startColumn := lexer.column
-	startRow := lexer.row
+	startColumn := lexer.Column
+	startRow := lexer.Row
 	if lexer.current == '"' {
 		lexer.advance()
 		for lexer.current != '"' {
 			lexer.advance()
 			if lexer.current == 0 {
-				lexer.column = startColumn
-				lexer.row = startRow
+				lexer.Column = startColumn
+				lexer.Row = startRow
 				lexer.throwLexicalError("Unterminated string")
 				break
 			}
@@ -199,8 +199,8 @@ func (lexer *Lexer) readString() string {
 		for lexer.current != '\'' {
 			lexer.advance()
 			if lexer.current == 0 {
-				lexer.column = startColumn
-				lexer.row = startRow
+				lexer.Column = startColumn
+				lexer.Row = startRow
 				lexer.throwLexicalError("Unterminated string")
 				break
 			}
@@ -225,5 +225,5 @@ func (lexer *Lexer) peek() rune {
 }
 
 func (lexer *Lexer) throwLexicalError(message string) {
-	fmt.Printf("\nLexical error at line %d, position %d: %s\n\n", lexer.row, lexer.column, message)
+	fmt.Printf("\nLexical error at line %d, position %d: %s\n\n", lexer.Row, lexer.Column, message)
 }

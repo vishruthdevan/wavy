@@ -59,7 +59,7 @@ func (parser *Parser) Errors() []string {
 }
 
 func (parser *Parser) peekError(t lexer.TokenType) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, parser.peekToken.Type)
+	msg := fmt.Sprintf("expected next token to be %s, got %s instead at line %d, position %d", t, parser.peekToken.Type, parser.lexer.Row, parser.lexer.Column)
 	parser.errors = append(parser.errors, msg)
 }
 
@@ -154,30 +154,12 @@ func (p *Parser) ParseProgram() *Program {
 
 func (p *Parser) parseStatement() Statement {
 	switch p.currentToken.Type {
-	// case lexer.IDENTIFIER:
-	// 	return p.parseAssignmentStatement()
 	case lexer.RETURN:
 		return p.parseReturnStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
 }
-
-// func (p *Parser) parseAssignmentStatement() *AssignmentStatement {
-// 	stmt := &AssignmentStatement{}
-
-// 	stmt.Name = &Identifier{Token: p.currentToken, Value: p.currentToken.Value}
-
-// 	if !p.peek(lexer.ASSIGN) {
-// 		return nil
-// 	}
-
-// 	for !p.isCurrentToken(lexer.SEMICOLON) {
-// 		p.nextToken()
-// 	}
-
-// 	return stmt
-// }
 
 func (p *Parser) parseReturnStatement() *ReturnStatement {
 	stmt := &ReturnStatement{Token: p.currentToken}
@@ -481,3 +463,4 @@ func (p *Parser) parseIndexExpression(left Expression) Expression {
 	}
 	return exp
 }
+
