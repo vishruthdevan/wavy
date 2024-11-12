@@ -16,25 +16,49 @@ A high-level programming language designed for the manipulation of audio files
     git clone https://github.com/vishruthdevan/wavy.git
     ```
 
-3. Run the `test-lexer.sh` script:  
+### Test the Lexer
 
-    ```bash
-    ./test-lexer.sh /wavy/<path-to-sample-file.vy> 
-    ```
+- Run the `test-lexer.sh` script:  
 
-    If you get a permission denied error while running the script, run the following command and try again:
+   ```bash
+   ./test-lexer.sh /wavy/<path-to-sample-file.vy> 
+   ```
+
+- If you get a permission denied error while running the script, run the following command and try again:
 
    ```bash
    chmod 755 test-lexer.sh
    ```
 
-4. Example Usage:
+- Example Usage:
 
-    ```bash
-    ./test-lexer.sh /wavy/samples/sample_1.vy
-    ```
+   ```bash
+   ./test-lexer.sh /wavy/lexer/samples/sample_1.vy
+   ```
 
-5. The expected outputs are the `.out` files in the `samples/expected_outputs/` directory. Running the script will generate `.out` files in the same directory as the input file. For example, if `/wavy/samples/sample_1.vy` was the input, the output will be written to `/wavy/samples/sample_1.vy.out`.
+- The expected outputs are the `.out` files in the `lexer/samples/expected_outputs/` directory. Running the script will generate `.out` files in the same directory as the input file. For example, if `/wavy/lexer/samples/sample_1.vy` was the input, the output will be written to `/wavy/lexer/samples/sample_1.vy.out`.
+
+### Test the Parser
+
+- Run the `test-parser.sh` script:  
+
+   ```bash
+   ./test-parser.sh /wavy/<path-to-sample-file.vy> 
+   ```
+
+- If you get a permission denied error while running the script, run the following command and try again:
+
+   ```bash
+   chmod 755 test-parser.sh
+   ```
+
+- Example Usage:
+
+   ```bash
+   ./test-parser.sh /wavy/parser/samples/sample_1.vy
+   ```
+
+- The expected outputs are the `.out` files in the `parser/samples/expected_outputs/` directory. Running the script will generate `.out` files in the same directory as the input file. For example, if `/wavy/parser/samples/sample_1.vy` was the input, the output will be written to `/wavy/parser/samples/sample_1.vy.out`.
 
 ## Lexical Grammar Definition
 
@@ -173,3 +197,109 @@ A string is a sequence of characters enclosed in double quotes (`"`) or single q
 | **Illegal Character**   | Encountered an unrecognized or invalid character.              | `^foo = 10`        | `Lexical error at line 1, position 1: Illegal character "@"` |
 | **Unterminated String** | A string literal is not properly closed with a matching quote. | `"hello`           | `Lexical error at line 1, position 7: Unterminated string`   |
 | **Invalid Number**      | Incorrect number format detected (e.g., multiple dots).        | `12.34.`, `123abc` | `Lexical error at line 1, position 6: Invalid number`        |
+
+## Context Free Grammar
+
+### Non-Terminals
+
+1. Program: Represents the full program consisting of statements.
+2. Statement: Represents a general statement (e.g., assignment, return, expression).
+3. Expression: Represents expressions including arithmetic operations, boolean values, function calls, etc.
+4. Block: Represents a block of statements, often used in function bodies, if statements, and for loops.
+5. Literal: Represents literals like integers, floats, strings, and boolean values.
+
+### Terminals
+
+1. IDENTIFIER: Identifier (variable/function name).
+2. ASSIGN: =
+3. RETURN: return
+4. IF, ELSE, FOR: Keywords for control flow.
+5. PLUS, MINUS, ASTERISK, SLASH: Arithmetic operators (+, -, *, /).
+6. LPAREN, RPAREN: Parentheses ((, )).
+7. LBRACE, RBRACE: Braces ({, }).
+8. SEMICOLON: ;
+9. INT_LITERAL, FLOAT_LITERAL, STRING_LITERAL, BOOL_LITERAL: Various literal types.
+
+### Production Rules
+
+```plaintext
+<Program> → <StatementList>
+
+<StatementList> → <Statement> <StatementList>
+                  | ε
+
+<Statement> → <ExpressionStatement>
+              | <AssignmentStatement>
+              | <ReturnStatement>
+              | <IfStatement>
+              | <ForLoopStatement>
+              | <FunctionDeclaration>
+
+<ExpressionStatement> → <Expression> SEMICOLON
+
+<AssignmentStatement> → IDENTIFIER ASSIGN <Expression> SEMICOLON
+
+<ReturnStatement> → RETURN <Expression> SEMICOLON
+
+<IfStatement> → IF LPAREN <Expression> RPAREN LBRACE <Block> RBRACE
+               | IF LPAREN <Expression> RPAREN LBRACE <Block> RBRACE ELSE LBRACE <Block> RBRACE
+
+<ForLoopStatement> → FOR LPAREN <Expression> RPAREN LBRACE <Block> RBRACE
+
+<FunctionDeclaration> → IDENTIFIER LPAREN <ParameterList> RPAREN LBRACE <Block> RBRACE
+
+<ParameterList> → IDENTIFIER <ParameterListTail>
+                 | ε
+
+<ParameterListTail> → COMMA IDENTIFIER <ParameterListTail>
+                      | ε
+
+<Block> → <StatementList>
+
+<Expression> → <Literal>
+               | IDENTIFIER
+               | <PrefixExpression>
+               | <InfixExpression>
+               | <FunctionCall>
+               | <GroupedExpression>
+               | <ArrayLiteral>
+               | <IndexExpression>
+
+<PrefixExpression> → (BANG | MINUS) <Expression>
+
+<InfixExpression> → <Expression> (PLUS | MINUS | ASTERISK | SLASH) <Expression>
+
+<FunctionCall> → IDENTIFIER LPAREN <ArgumentList> RPAREN
+
+<ArgumentList> → <Expression> <ArgumentListTail>
+                 | ε
+
+<ArgumentListTail> → COMMA <Expression> <ArgumentListTail>
+                     | ε
+
+<GroupedExpression> → LPAREN <Expression> RPAREN
+
+<ArrayLiteral> → LBRACKET <ExpressionList> RBRACKET
+
+<ExpressionList> → <Expression> <ExpressionListTail>
+                   | ε
+
+<ExpressionListTail> → COMMA <Expression> <ExpressionListTail>
+                       | ε
+
+<IndexExpression> → <Expression> LBRACKET <Expression> RBRACKET
+
+<Literal> → INT_LITERAL
+            | FLOAT_LITERAL
+            | STRING_LITERAL
+            | BOOL_LITERAL
+```
+
+## Parsing Algorithm
+
+- The Wavy programming language employs recursive descent parsing combined with Pratt parsing specifically for expression evaluation. This design choice leverages recursive descent parsing to provide a clear and modular approach to syntax analysis, where each grammar rule is represented by a function, enabling easy readability and maintainability of the parser. 
+- For expressions, Wavy uses Pratt parsing, which allows flexible handling of operator precedence and associativity, making it well-suited for parsing complex expressions efficiently. This hybrid approach ensures that Wavy's syntax and expression parsing are both intuitive and powerful, facilitating robust language processing.
+
+## Demo Video
+
+URL: 
