@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"wavy/lexer"
 )
@@ -9,6 +10,7 @@ import (
 type Node interface {
 	TokenValue() string
 	String() string
+	Tree(indentation string, base bool) string
 }
 
 type Statement interface {
@@ -41,6 +43,14 @@ func (program *Program) String() string {
 
 	return out.String()
 }
+func (program *Program) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	out.WriteString(indentation + "PROGRAM\n")
+	for _, s := range program.Statements {
+		out.WriteString(s.Tree(indentation, true))
+	}
+	return out.String()
+}
 
 type Identifier struct {
 	Token lexer.Token
@@ -50,6 +60,12 @@ type Identifier struct {
 func (i *Identifier) expressionNode()    {}
 func (i *Identifier) TokenValue() string { return i.Token.Value }
 func (i *Identifier) String() string     { return i.Value }
+func (i *Identifier) Tree(indentation string, base bool) string {
+	if base {
+		return fmt.Sprintf("%sIDENTIFIER (%s)\n", indentation, i.Value)
+	}
+	return fmt.Sprintf("IDENTIFIER (%s)\n", i.Value)
+}
 
 type AssignmentStatement struct {
 	Token    lexer.Token
@@ -70,6 +86,59 @@ func (as *AssignmentStatement) String() string {
 	out.WriteString(";")
 	return out.String()
 }
+func (as *AssignmentStatement) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	if base {
+		out.WriteString(indentation + "ASSIGNMENT\n")
+	} else {
+		out.WriteString("ASSIGNMENT\n")
+	}
+	out.WriteString(indentation + "├── IDENTIFIER (" + as.Name.Value + ")\n")
+	out.WriteString(indentation + "├── " + as.Operator + "\n")
+	out.WriteString(indentation + "└── " + as.Value.Tree(indentation+"    ", false))
+	return out.String()
+}
+
+type LoadStatement struct {
+	Token lexer.Token
+	Value Expression
+}
+
+func (ls *LoadStatement) statementNode()     {}
+func (ls *LoadStatement) TokenValue() string { return ls.Token.Value }
+func (ls *LoadStatement) String() string {
+	return fmt.Sprintf("load('%s');", ls.Value)
+}
+func (ls *LoadStatement) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	if base {
+		out.WriteString(indentation + "LOAD\n")
+	} else {
+		out.WriteString("LOAD\n")
+	}
+	out.WriteString(indentation + "  └── " + ls.Value.Tree(indentation, false) + "\n")
+	return out.String()
+}
+
+// export(audio1, 'looped_audio1.wav')
+type ExportStatement struct {
+	Token lexer.Token
+	Name  string
+	Value string
+}
+
+func (es *ExportStatement) expressionNode()    {}
+func (es *ExportStatement) TokenValue() string { return es.Token.Value }
+func (es *ExportStatement) String() string {
+	return fmt.Sprintf("export %s, '%s';", es.Name, es.Value)
+}
+func (es *ExportStatement) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	out.WriteString(indentation + "EXPORT\n")
+	out.WriteString(indentation + "  ├── " + es.Name + "\n")
+	out.WriteString(indentation + "  └── " + es.Value + "\n")
+	return out.String()
+}
 
 type ReturnStatement struct {
 	Token       lexer.Token
@@ -88,6 +157,18 @@ func (rs *ReturnStatement) String() string {
 	out.WriteString(";")
 	return out.String()
 }
+func (rs *ReturnStatement) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	if base {
+		out.WriteString(indentation + "RETURN\n")
+	} else {
+		out.WriteString("RETURN\n")
+	}
+	if rs.ReturnValue != nil {
+		out.WriteString(indentation + "└── " + rs.ReturnValue.Tree(indentation+"   ", false))
+	}
+	return out.String()
+}
 
 type ExpressionStatement struct {
 	Token      lexer.Token
@@ -102,6 +183,12 @@ func (es *ExpressionStatement) String() string {
 	}
 	return ""
 }
+func (es *ExpressionStatement) Tree(indentation string, base bool) string {
+	if es.Expression != nil {
+		return es.Expression.Tree(indentation, false)
+	}
+	return indentation + "EXPRESSION_STATEMENT\n"
+}
 
 type IntegerValue struct {
 	Token lexer.Token
@@ -111,6 +198,12 @@ type IntegerValue struct {
 func (il *IntegerValue) expressionNode()    {}
 func (il *IntegerValue) TokenValue() string { return il.Token.Value }
 func (il *IntegerValue) String() string     { return il.Token.Value }
+func (il *IntegerValue) Tree(indentation string, base bool) string {
+	if base {
+		return fmt.Sprintf("%sINTEGER (%d)\n", indentation, il.Value)
+	}
+	return fmt.Sprintf("INTEGER (%d)\n", il.Value)
+}
 
 type FloatValue struct {
 	Token lexer.Token
@@ -120,6 +213,12 @@ type FloatValue struct {
 func (fl *FloatValue) expressionNode()    {}
 func (fl *FloatValue) TokenValue() string { return fl.Token.Value }
 func (fl *FloatValue) String() string     { return fl.Token.Value }
+func (fl *FloatValue) Tree(indentation string, base bool) string {
+	if base {
+		return fmt.Sprintf("%sFLOAT (%f)\n", indentation, fl.Value)
+	}
+	return fmt.Sprintf("FLOAT (%f)\n", fl.Value)
+}
 
 type PrefixExpression struct {
 	Token    lexer.Token // The prefix token, e.g. !
@@ -137,6 +236,13 @@ func (pe *PrefixExpression) String() string {
 	out.WriteString(")")
 	return out.String()
 }
+func (pe *PrefixExpression) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	out.WriteString(indentation + "PREFIX\n")
+	out.WriteString(indentation + "  ├── " + pe.Operator + "\n")
+	out.WriteString(indentation + "  └── " + pe.Right.Tree(indentation+"    ", false))
+	return out.String()
+}
 
 type InfixExpression struct {
 	Token    lexer.Token
@@ -145,15 +251,27 @@ type InfixExpression struct {
 	Right    Expression
 }
 
-func (oe *InfixExpression) expressionNode()    {}
-func (oe *InfixExpression) TokenValue() string { return oe.Token.Value }
-func (oe *InfixExpression) String() string {
+func (ie *InfixExpression) expressionNode()    {}
+func (ie *InfixExpression) TokenValue() string { return ie.Token.Value }
+func (ie *InfixExpression) String() string {
 	var out bytes.Buffer
 	out.WriteString("(")
-	out.WriteString(oe.Left.String())
-	out.WriteString(" " + oe.Operator + " ")
-	out.WriteString(oe.Right.String())
+	out.WriteString(ie.Left.String())
+	out.WriteString(" " + ie.Operator + " ")
+	out.WriteString(ie.Right.String())
 	out.WriteString(")")
+	return out.String()
+}
+func (ie *InfixExpression) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	if base {
+		out.WriteString(indentation + "INFIX\n")
+	} else {
+		out.WriteString("INFIX\n")
+	}
+	out.WriteString(indentation + "  ├── " + ie.Left.Tree(indentation+"  │  ", false))
+	out.WriteString(indentation + "  ├── " + ie.Operator + "\n")
+	out.WriteString(indentation + "  └── " + ie.Right.Tree(indentation+"     ", false))
 	return out.String()
 }
 
@@ -165,6 +283,9 @@ type Boolean struct {
 func (b *Boolean) expressionNode()    {}
 func (b *Boolean) TokenValue() string { return b.Token.Value }
 func (b *Boolean) String() string     { return b.Token.Value }
+func (b *Boolean) Tree(indentation string, base bool) string {
+	return fmt.Sprintf("%sBOOLEAN (%t)\n", indentation, b.Value)
+}
 
 type IfExpression struct {
 	Token       lexer.Token
@@ -187,6 +308,23 @@ func (ie *IfExpression) String() string {
 	}
 	return out.String()
 }
+func (ie *IfExpression) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	if base {
+		out.WriteString(indentation + "IF_STATEMENT\n")
+	} else {
+		out.WriteString("IF_STATEMENT\n")
+	}
+	out.WriteString(indentation + "├── CONDITION\n")
+	out.WriteString(indentation + ie.Condition.Tree("│   ", false))
+	out.WriteString(indentation + "├── CONSEQUENCE\n")
+	out.WriteString(indentation + "│   " + ie.Consequence.Tree(indentation+"│   ", false))
+	if ie.Alternative != nil {
+		out.WriteString(indentation + "└── ALTERNATIVE\n")
+		out.WriteString(indentation + "    " + ie.Alternative.Tree(indentation+"      ", false))
+	}
+	return out.String()
+}
 
 type BlockStatement struct {
 	Token      lexer.Token
@@ -201,6 +339,22 @@ func (bs *BlockStatement) String() string {
 		out.WriteString(s.String())
 	}
 
+	return out.String()
+}
+func (bs *BlockStatement) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	if base {
+		out.WriteString(indentation + "BLOCK\n")
+	} else {
+		out.WriteString("BLOCK\n")
+	}
+	for i, s := range bs.Statements {
+		if i == len(bs.Statements)-1 {
+			out.WriteString(indentation + "└── " + s.Tree(indentation+"    ", false))
+		} else {
+			out.WriteString(indentation + "├── " + s.Tree(indentation+"│   ", false))
+		}
+	}
 	return out.String()
 }
 
@@ -224,6 +378,25 @@ func (fl *FunctionLiteral) String() string {
 	out.WriteString(strings.Join(params, ", "))
 	out.WriteString(") ")
 	out.WriteString(fl.Body.String())
+	return out.String()
+}
+func (fl *FunctionLiteral) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	if base {
+		out.WriteString(indentation + "FUNCTION\n")
+	} else {
+		out.WriteString("FUNCTION\n")
+	}
+	out.WriteString(indentation + "  ├── PARAMETERS\n")
+	for i, param := range fl.Parameters {
+		prefix := "  │   ├── "
+		if i == len(fl.Parameters)-1 {
+			prefix = "  │   └── "
+		}
+		out.WriteString(indentation + prefix + param.Tree(indentation+"      ", false))
+	}
+	out.WriteString(indentation + "  └── BODY\n")
+	out.WriteString(indentation + "      " + fl.Body.Tree(indentation+"      ", false))
 	return out.String()
 }
 
@@ -250,6 +423,25 @@ func (ce *CallExpression) String() string {
 
 	return out.String()
 }
+func (ce *CallExpression) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	if base {
+		out.WriteString(indentation + "CALL_EXPRESSION\n")
+	} else {
+		out.WriteString("CALL_EXPRESSION\n")
+	}
+	out.WriteString(indentation + "├── FUNCTION\n")
+	out.WriteString(indentation + ce.Function.Tree("│   ", true))
+	out.WriteString(indentation + "└── ARGUMENTS\n")
+	for i, arg := range ce.Arguments {
+		prefix := "    ├── "
+		if i == len(ce.Arguments)-1 {
+			prefix = "    └── "
+		}
+		out.WriteString(indentation + prefix + arg.Tree(indentation+"      ", false))
+	}
+	return out.String()
+}
 
 type ForLoopExpression struct {
 	Token       lexer.Token
@@ -268,6 +460,15 @@ func (fle *ForLoopExpression) String() string {
 	out.WriteString("}")
 	return out.String()
 }
+func (fle *ForLoopExpression) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	out.WriteString(indentation + "FOR_LOOP\n")
+	out.WriteString(indentation + " ├── CONDITION\n")
+	out.WriteString(indentation + " │   " + fle.Condition.Tree(indentation+" │   ", false))
+	out.WriteString(indentation + " └── CONSEQUENCE\n")
+	out.WriteString(indentation + "      " + fle.Consequence.Tree(indentation+"      ", false))
+	return out.String()
+}
 
 type StringValue struct {
 	Token lexer.Token
@@ -277,6 +478,16 @@ type StringValue struct {
 func (sl *StringValue) expressionNode()    {}
 func (sl *StringValue) TokenValue() string { return sl.Token.Value }
 func (sl *StringValue) String() string     { return sl.Token.Value }
+func (sl *StringValue) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	if base {
+		out.WriteString(indentation + "STRING\n")
+	} else {
+		out.WriteString("STRING\n")
+	}
+	out.WriteString(indentation + "  └── " + sl.Value + "\n")
+	return out.String()
+}
 
 type ArrayLiteral struct {
 	Token    lexer.Token
@@ -296,6 +507,22 @@ func (al *ArrayLiteral) String() string {
 	out.WriteString("]")
 	return out.String()
 }
+func (al *ArrayLiteral) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	if base {
+		out.WriteString(indentation + "ARRAY_LITERAL\n")
+	} else {
+		out.WriteString("ARRAY_LITERAL\n")
+	}
+	for i, elem := range al.Elements {
+		prefix := "  ├── "
+		if i == len(al.Elements)-1 {
+			prefix = "  └── "
+		}
+		out.WriteString(indentation + prefix + elem.Tree(indentation, false))
+	}
+	return out.String()
+}
 
 type IndexExpression struct {
 	Token lexer.Token
@@ -312,6 +539,19 @@ func (ie *IndexExpression) String() string {
 	out.WriteString("[")
 	out.WriteString(ie.Index.String())
 	out.WriteString("])")
+	return out.String()
+}
+func (ie *IndexExpression) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	if base {
+		out.WriteString(indentation + "INDEX_EXPRESSION\n")
+	} else {
+		out.WriteString("INDEX_EXPRESSION\n")
+	}
+	out.WriteString(indentation + "     ├── LEFT\n")
+	out.WriteString(indentation + "     │   " + ie.Left.Tree(indentation+"  │   ", false))
+	out.WriteString(indentation + "     └── INDEX\n")
+	out.WriteString(indentation + "         " + ie.Index.Tree(indentation+"      ", false))
 	return out.String()
 }
 
@@ -334,5 +574,17 @@ func (fes *ForeachStatement) String() string {
 	out.WriteString(" ")
 	out.WriteString(fes.Value.String())
 	out.WriteString(fes.Body.String())
+	return out.String()
+}
+func (fes *ForeachStatement) Tree(indentation string, base bool) string {
+	var out bytes.Buffer
+	out.WriteString(indentation + "FOREACH_STATEMENT\n")
+	out.WriteString(indentation + "  ├── IDENTIFIER (" + fes.Ident + ")\n")
+	out.WriteString(indentation + "  ├── INDEX\n")
+	out.WriteString(indentation + "  │   └── " + fes.Index + "\n")
+	out.WriteString(indentation + "  ├── VALUE\n")
+	out.WriteString(indentation + "  │   └── " + fes.Value.Tree(indentation+"  │   ", false))
+	out.WriteString(indentation + "  └── BODY\n")
+	out.WriteString(indentation + "      └── " + fes.Body.Tree(indentation+"        ", false))
 	return out.String()
 }
