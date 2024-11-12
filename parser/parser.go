@@ -230,7 +230,7 @@ func (p *Parser) parseFloatValue() Expression {
 }
 
 func (p *Parser) noPrefixParseFnError(t lexer.TokenType) {
-	msg := fmt.Sprintf("no prefix parse function for %s found", t)
+	msg := fmt.Sprintf("no prefix parse function for %s found at line %d, position %d", t, p.lexer.Row, p.lexer.Column)
 	p.errors = append(p.errors, msg)
 }
 
