@@ -50,8 +50,6 @@ const (
 	FOR      = "FOR"
 	FOREACH  = "FOREACH"
 	IN       = "IN"
-	LOAD     = "LOAD"
-	EXPORT   = "EXPORT"
 )
 
 var keywords = map[string]TokenType{
@@ -63,7 +61,6 @@ var keywords = map[string]TokenType{
 	"false":    FALSE,
 	"null":     NULL,
 	"for":      FOR,
+	"foreach":  FOREACH,
 	"in":       IN,
-	"load":     LOAD,
-	"export":   EXPORT,
 }
