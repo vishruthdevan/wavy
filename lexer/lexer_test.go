@@ -15,7 +15,7 @@ func init() {
 	flag.StringVar(&filePath, "file", "../samples/sample_1.vy", "sample .vy file to process")
 }
 
-func TestNextToken(t *testing.T) {
+func TestLexer(t *testing.T) {
 	flag.Parse()
 
 	directory := filepath.Dir(filePath)

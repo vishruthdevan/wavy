@@ -12,6 +12,7 @@ type Lexer struct {
 	Column       int
 	nextPosition int
 	current      rune
+	errors       []string
 }
 
 func Init(input string) *Lexer {
@@ -225,5 +226,6 @@ func (lexer *Lexer) peek() rune {
 }
 
 func (lexer *Lexer) throwLexicalError(message string) {
-	fmt.Printf("\nLexical error at line %d, position %d: %s\n\n", lexer.Row, lexer.Column, message)
+	msg := fmt.Sprintf("\nLexical error at line %d, position %d: %s\n\n", lexer.Row, lexer.Column, message)
+	lexer.errors = append(lexer.errors, msg)
 }
