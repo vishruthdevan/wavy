@@ -169,7 +169,7 @@ func (p *Parser) parseReturnStatement() *ReturnStatement {
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
 
-	for !p.isCurrentToken(lexer.SEMICOLON) {
+	if p.isPeekToken(lexer.SEMICOLON) {
 		p.nextToken()
 	}
 
@@ -206,6 +206,7 @@ func (p *Parser) parseExpression(precedence int) Expression {
 
 func (p *Parser) parseIntegerValue() Expression {
 	lit := &IntegerValue{Token: p.currentToken}
+
 	value, err := strconv.ParseInt(p.currentToken.Value, 0, 64)
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q as integer", p.currentToken.Value)
