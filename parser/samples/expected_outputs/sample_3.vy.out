@@ -1,0 +1,46 @@
+PROGRAM
+ASSIGNMENT
+├── IDENTIFIER (audio1)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (load)
+    └── ARGUMENTS
+        └── STRING
+            └── audio1.wav
+ASSIGNMENT
+├── IDENTIFIER (duration)
+├── =
+└── FLOAT (0.000000)
+FOR_LOOP
+ ├── CONDITION
+ │   INFIX
+ │     ├── IDENTIFIER (duration)
+ │     ├── <
+ │     └── FLOAT (10.000000)
+ └── CONSEQUENCE
+      BLOCK
+      ├── ASSIGNMENT
+      │   ├── IDENTIFIER (audio1)
+      │   ├── =
+      │   └── CALL_EXPRESSION
+      │       ├── FUNCTION
+      │       │   IDENTIFIER (loop)
+      │       └── ARGUMENTS
+      │           ├── IDENTIFIER (audio1)
+      │           └── INTEGER (1)
+      └── ASSIGNMENT
+          ├── IDENTIFIER (duration)
+          ├── =
+          └── CALL_EXPRESSION
+              ├── FUNCTION
+              │   IDENTIFIER (getDuration)
+              └── ARGUMENTS
+                  └── IDENTIFIER (audio1)
+CALL_EXPRESSION
+├── FUNCTION
+│   IDENTIFIER (export)
+└── ARGUMENTS
+    ├── IDENTIFIER (audio1)
+    └── STRING
+        └── looped_audio1.wav

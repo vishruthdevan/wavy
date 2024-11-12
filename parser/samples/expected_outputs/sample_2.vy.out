@@ -1,0 +1,77 @@
+PROGRAM
+ASSIGNMENT
+├── IDENTIFIER (audioFiles)
+├── =
+└── ARRAY_LITERAL
+      ├── STRING
+      └── input1.wav
+      ├── STRING
+      └── input2.wav
+      └── STRING
+      └── input3.wav
+ASSIGNMENT
+├── IDENTIFIER (audioClips)
+├── =
+└── ARRAY_LITERAL
+FOREACH_STATEMENT
+  ├── IDENTIFIER (file)
+  ├── INDEX
+  │   └── 
+  ├── VALUE
+  │   └── IDENTIFIER (audioFiles)
+  └── BODY
+      └── BLOCK
+        ├── ASSIGNMENT
+        │   ├── IDENTIFIER (clip)
+        │   ├── =
+        │   └── CALL_EXPRESSION
+        │       ├── FUNCTION
+        │       │   IDENTIFIER (load)
+        │       └── ARGUMENTS
+        │           └── IDENTIFIER (file)
+        ├── CALL_EXPRESSION
+        │   ├── FUNCTION
+        │   │   IDENTIFIER (fadeIn)
+        │   └── ARGUMENTS
+        │       ├── IDENTIFIER (clip)
+        │       └── FLOAT (3.000000)
+        └── CALL_EXPRESSION
+            ├── FUNCTION
+            │   IDENTIFIER (append)
+            └── ARGUMENTS
+                ├── IDENTIFIER (audioClips)
+                └── IDENTIFIER (clip)
+ASSIGNMENT
+├── IDENTIFIER (total_duration)
+├── =
+└── INFIX
+      ├── INFIX
+      │    ├── CALL_EXPRESSION
+      │    │  ├── FUNCTION
+      │    │  │   IDENTIFIER (getDuration)
+      │    │  └── ARGUMENTS
+      │    │      └── INDEX_EXPRESSION
+      │    │             ├── LEFT
+      │    │             │   IDENTIFIER (audioClips)
+      │    │             └── INDEX
+      │    │                 INTEGER (0)
+      │    ├── +
+      │    └── CALL_EXPRESSION
+      │       ├── FUNCTION
+      │       │   IDENTIFIER (getDuration)
+      │       └── ARGUMENTS
+      │           └── INDEX_EXPRESSION
+      │                  ├── LEFT
+      │                  │   IDENTIFIER (audioClips)
+      │                  └── INDEX
+      │                      INTEGER (1)
+      ├── +
+      └── CALL_EXPRESSION
+         ├── FUNCTION
+         │   IDENTIFIER (getDuration)
+         └── ARGUMENTS
+             └── INDEX_EXPRESSION
+                    ├── LEFT
+                    │   IDENTIFIER (audioClips)
+                    └── INDEX
+                        INTEGER (2)

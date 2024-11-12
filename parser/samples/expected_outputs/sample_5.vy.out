@@ -1,0 +1,54 @@
+PROGRAM
+ASSIGNMENT
+├── IDENTIFIER (aud1)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (load)
+    └── ARGUMENTS
+        └── STRING
+            └── input1.wav
+ASSIGNMENT
+├── IDENTIFIER (format)
+├── =
+└── STRING
+      └── aac
+IF_STATEMENT
+├── CONDITION
+INFIX
+│     ├── IDENTIFIER (format)
+│     ├── ==
+│     └── STRING
+│          └── aac
+├── CONSEQUENCE
+│   BLOCK
+│   ├── CALL_EXPRESSION
+│   │   ├── FUNCTION
+│   │   │   IDENTIFIER (changeFormat)
+│   │   └── ARGUMENTS
+│   │       ├── IDENTIFIER (aud1)
+│   │       └── STRING
+│   │           └── aac
+│   └── CALL_EXPRESSION
+│       ├── FUNCTION
+│       │   IDENTIFIER (export)
+│       └── ARGUMENTS
+│           ├── IDENTIFIER (aud1)
+│           └── STRING
+│               └── output1.aac
+└── ALTERNATIVE
+    BLOCK
+      ├── CALL_EXPRESSION
+      │   ├── FUNCTION
+      │   │   IDENTIFIER (changeFormat)
+      │   └── ARGUMENTS
+      │       ├── IDENTIFIER (aud1)
+      │       └── STRING
+      │           └── mp3
+      └── CALL_EXPRESSION
+          ├── FUNCTION
+          │   IDENTIFIER (export)
+          └── ARGUMENTS
+              ├── IDENTIFIER (aud1)
+              └── STRING
+                  └── output1.mp3

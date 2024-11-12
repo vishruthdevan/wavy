@@ -1,0 +1,8 @@
+parser has 7 error(s):
+expected next token to be RBRACKET, got COMMA instead at line 7, position 18
+no prefix parse function for COMMA found at line 7, position 22
+no prefix parse function for COMMA found at line 7, position 28
+no prefix parse function for RBRACKET found at line 8, position 4
+no prefix parse function for COMMA found at line 10, position 18
+expected next token to be RPR, got IDENTIFIER instead at line 10, position 18
+no prefix parse function for RPR found at line 10, position 20

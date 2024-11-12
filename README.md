@@ -60,6 +60,8 @@ A high-level programming language designed for the manipulation of audio files
 
 - The expected outputs are the `.out` files in the `parser/samples/expected_outputs/` directory. Running the script will generate `.out` files in the same directory as the input file. For example, if `/wavy/parser/samples/sample_1.vy` was the input, the output will be written to `/wavy/parser/samples/sample_1.vy.out`.
 
+- sample_1.vy and sample_4.vy have been intentionally modified to make the parser identify errors.
+
 ## Lexical Grammar Definition
 
 ### 1. Keywords (`KEYWORD`)
