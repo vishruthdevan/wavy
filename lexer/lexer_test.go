@@ -12,10 +12,10 @@ import (
 var filePath string
 
 func init() {
-	flag.StringVar(&filePath, "file", "../samples/sample_1.vy", "sample .vy file to process")
+	flag.StringVar(&filePath, "file", "/wavy/lexer/samples/sample_1.vy", "sample .vy file to process")
 }
 
-func TestLexer(t *testing.T) {
+func TestLexerOutput(t *testing.T) {
 	flag.Parse()
 
 	directory := filepath.Dir(filePath)

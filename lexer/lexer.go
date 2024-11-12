@@ -21,6 +21,10 @@ func Init(input string) *Lexer {
 	return lexer
 }
 
+func (lexer *Lexer) Errors() []string {
+	return lexer.errors
+}
+
 func (lexer *Lexer) advance() {
 	if lexer.nextPosition < len(lexer.input) {
 		lexer.current = rune(lexer.input[lexer.nextPosition])
@@ -121,7 +125,7 @@ func (lexer *Lexer) NextToken() Token {
 		} else {
 			t.Type = ILLEGAL
 			t.Value = string(lexer.current)
-			lexer.throwLexicalError("Illegal character \"" + t.Value + "\"")
+			lexer.throwLexicalError("illegal character \"" + t.Value + "\"")
 		}
 	}
 	lexer.advance()
@@ -161,7 +165,7 @@ func (lexer *Lexer) readNumber() string {
 		lexer.advance()
 
 		if !isDigit(lexer.current) {
-			lexer.throwLexicalError("Invalid number")
+			lexer.throwLexicalError("invalid number")
 		}
 
 		for isDigit(lexer.current) {
@@ -169,11 +173,11 @@ func (lexer *Lexer) readNumber() string {
 		}
 	}
 	if lexer.current == '.' {
-		lexer.throwLexicalError("Invalid number")
+		lexer.throwLexicalError("invalid number")
 	}
 
 	if isValidChar(lexer.current) {
-		lexer.throwLexicalError("Invalid number")
+		lexer.throwLexicalError("invalid number")
 	}
 
 	return lexer.input[start:lexer.position]
@@ -190,7 +194,7 @@ func (lexer *Lexer) readString() string {
 			if lexer.current == 0 {
 				lexer.Column = startColumn
 				lexer.Row = startRow
-				lexer.throwLexicalError("Unterminated string")
+				lexer.throwLexicalError("unterminated string")
 				break
 			}
 		}
@@ -202,7 +206,7 @@ func (lexer *Lexer) readString() string {
 			if lexer.current == 0 {
 				lexer.Column = startColumn
 				lexer.Row = startRow
-				lexer.throwLexicalError("Unterminated string")
+				lexer.throwLexicalError("unterminated string")
 				break
 			}
 		}
@@ -226,6 +230,6 @@ func (lexer *Lexer) peek() rune {
 }
 
 func (lexer *Lexer) throwLexicalError(message string) {
-	msg := fmt.Sprintf("\nLexical error at line %d, position %d: %s\n\n", lexer.Row, lexer.Column, message)
+	msg := fmt.Sprintf("%s at line %d, position %d", message, lexer.Row, lexer.Column)
 	lexer.errors = append(lexer.errors, msg)
 }
