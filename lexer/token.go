@@ -48,6 +48,7 @@ const (
 	FALSE    = "FALSE"
 	NULL     = "NULL"
 	FOR      = "FOR"
+	FOREACH  = "FOREACH"
 	IN       = "IN"
 	LOAD     = "LOAD"
 	EXPORT   = "EXPORT"

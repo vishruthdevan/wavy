@@ -314,3 +314,25 @@ func (ie *IndexExpression) String() string {
 	out.WriteString("])")
 	return out.String()
 }
+
+type ForeachStatement struct {
+	Token lexer.Token
+	Index string
+	Ident string
+	Value Expression
+	Body  *BlockStatement
+}
+
+func (fes *ForeachStatement) expressionNode() {}
+
+func (fes *ForeachStatement) TokenValue() string { return fes.Token.Value }
+
+func (fes *ForeachStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("foreach ")
+	out.WriteString(fes.Ident)
+	out.WriteString(" ")
+	out.WriteString(fes.Value.String())
+	out.WriteString(fes.Body.String())
+	return out.String()
+}

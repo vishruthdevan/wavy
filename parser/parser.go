@@ -120,6 +120,7 @@ func Init(l *lexer.Lexer) *Parser {
 	parser.registerPrefix(lexer.FLOAT, parser.parseFloatValue)
 	parser.registerPrefix(lexer.STRING, parser.parseStringValue)
 	parser.registerPrefix(lexer.LBRACKET, parser.parseArrayLiteral)
+	parser.registerPrefix(lexer.FOREACH, parser.parseForEach)
 
 	parser.infixParseFns = make(map[lexer.TokenType]infixParseFn)
 	parser.registerInfix(lexer.ASSIGN, parser.parseAssignExpression)
@@ -464,3 +465,37 @@ func (p *Parser) parseIndexExpression(left Expression) Expression {
 	return exp
 }
 
+func (p *Parser) parseForEach() Expression {
+	expression := &ForeachStatement{Token: p.currentToken}
+	p.nextToken()
+	expression.Ident = p.currentToken.Value
+
+	if p.isPeekToken(lexer.COMMA) {
+		p.nextToken()
+
+		if !p.isPeekToken(lexer.IDENTIFIER) {
+			p.errors = append(p.errors, fmt.Sprintf("second argument to foreach must be ident, got %v", p.peekToken))
+			return nil
+		}
+
+		p.nextToken()
+		expression.Index = expression.Ident
+		expression.Ident = p.currentToken.Value
+
+	}
+
+	if !p.peek(lexer.IN) {
+		return nil
+	}
+	p.nextToken()
+
+	expression.Value = p.parseExpression(LOWEST)
+	if expression.Value == nil {
+		return nil
+	}
+
+	p.nextToken()
+	expression.Body = p.parseBlockStatement()
+
+	return expression
+}
