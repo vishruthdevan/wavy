@@ -1,9 +1,9 @@
 audioFiles = ["input1.wav", "input2.wav", "input3.wav"]
 audioClips = []
 
-for (file in audioFiles) {
+foreach file in audioFiles {
     clip = load(file)
-    fadeIn(clip, duration: 3.0)
+    fadeIn(clip, 3.0)
     append(audioClips, clip)
 }
 

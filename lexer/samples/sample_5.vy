@@ -1,13 +1,10 @@
 aud1 = load("input1.wav")
 format = "aac"
 
-if (format == 'wav') {
-    export(aud1, 'output1.wav')
-} else if (format == 'mp3') {
-    changeFormat(aud1, format: 'wav')
-    export(aud1, 'output1.mp3')
-} else if (format == 'aac') {
+if (format == 'aac') {
+    changeFormat(aud1, 'aac')
     export(aud1, 'output1.aac')
 } else {
-    print("Invalid format)
+    changeFormat(aud1, 'mp3')
+    export(aud1, 'output1.mp3')
 }
