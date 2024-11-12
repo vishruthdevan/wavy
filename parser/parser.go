@@ -115,6 +115,7 @@ func Init(l *lexer.Lexer) *Parser {
 	parser.registerPrefix(lexer.IF, parser.parseIfExpression)
 	parser.registerPrefix(lexer.FUNCTION, parser.parseFunctionLiteral)
 	parser.registerPrefix(lexer.FOR, parser.parseForLoopExpression)
+	parser.registerPrefix(lexer.FLOAT, parser.parseFloatValue)
 
 	parser.infixParseFns = make(map[lexer.TokenType]infixParseFn)
 	parser.registerInfix(lexer.ASSIGN, parser.parseAssignExpression)
@@ -225,6 +226,18 @@ func (p *Parser) parseIntegerValue() Expression {
 	}
 	lit.Value = value
 	return lit
+}
+
+func (p *Parser) parseFloatValue() Expression {
+	float := &FloatValue{Token: p.currentToken}
+	value, err := strconv.ParseFloat(p.currentToken.Value, 64)
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as float", p.currentToken.Value)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+	float.Value = value
+	return float
 }
 
 func (p *Parser) noPrefixParseFnError(t lexer.TokenType) {
