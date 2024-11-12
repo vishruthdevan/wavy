@@ -117,6 +117,7 @@ func Init(l *lexer.Lexer) *Parser {
 	parser.registerPrefix(lexer.FOR, parser.parseForLoopExpression)
 	parser.registerPrefix(lexer.FLOAT, parser.parseFloatValue)
 	parser.registerPrefix(lexer.STRING, parser.parseStringValue)
+	parser.registerPrefix(lexer.LBRACKET, parser.parseArrayLiteral)
 
 	parser.infixParseFns = make(map[lexer.TokenType]infixParseFn)
 	parser.registerInfix(lexer.ASSIGN, parser.parseAssignExpression)
@@ -440,4 +441,29 @@ func (p *Parser) parseAssignExpression(name Expression) Expression {
 
 func (p *Parser) parseStringValue() Expression {
 	return &StringValue{Token: p.currentToken, Value: p.currentToken.Value}
+}
+
+func (p *Parser) parseArrayLiteral() Expression {
+	array := &ArrayLiteral{Token: p.currentToken}
+	array.Elements = p.parseExpressionList(lexer.RBRACKET)
+	return array
+}
+
+func (p *Parser) parseExpressionList(end lexer.TokenType) []Expression {
+	list := []Expression{}
+	if p.isPeekToken(end) {
+		p.nextToken()
+		return list
+	}
+	p.nextToken()
+	list = append(list, p.parseExpression(LOWEST))
+	for p.isPeekToken(lexer.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		list = append(list, p.parseExpression(LOWEST))
+	}
+	if !p.peek(end) {
+		return nil
+	}
+	return list
 }
