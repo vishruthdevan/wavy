@@ -268,3 +268,12 @@ func (fle *ForLoopExpression) String() string {
 	out.WriteString("}")
 	return out.String()
 }
+
+type StringValue struct {
+	Token lexer.Token
+	Value string
+}
+
+func (sl *StringValue) expressionNode()    {}
+func (sl *StringValue) TokenValue() string { return sl.Token.Value }
+func (sl *StringValue) String() string     { return sl.Token.Value }

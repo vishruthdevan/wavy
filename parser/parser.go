@@ -116,6 +116,7 @@ func Init(l *lexer.Lexer) *Parser {
 	parser.registerPrefix(lexer.FUNCTION, parser.parseFunctionLiteral)
 	parser.registerPrefix(lexer.FOR, parser.parseForLoopExpression)
 	parser.registerPrefix(lexer.FLOAT, parser.parseFloatValue)
+	parser.registerPrefix(lexer.STRING, parser.parseStringValue)
 
 	parser.infixParseFns = make(map[lexer.TokenType]infixParseFn)
 	parser.registerInfix(lexer.ASSIGN, parser.parseAssignExpression)
@@ -435,4 +436,8 @@ func (p *Parser) parseAssignExpression(name Expression) Expression {
 
 	stmt.Value = p.parseExpression(LOWEST)
 	return stmt
+}
+
+func (p *Parser) parseStringValue() Expression {
+	return &StringValue{Token: p.currentToken, Value: p.currentToken.Value}
 }
