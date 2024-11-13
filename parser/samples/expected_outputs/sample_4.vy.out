@@ -1,2 +1,56 @@
-lexer has 1 error(s):
-unterminated string at line 11, position 22
+PROGRAM
+ASSIGNMENT
+├── IDENTIFIER (scaleVolume)
+├── =
+└── FUNCTION
+      ├── PARAMETERS
+      │   ├── IDENTIFIER (volume)
+      │   └── IDENTIFIER (scale)
+      └── BODY
+          BLOCK
+          └── RETURN
+              └── INFIX
+                   ├── IDENTIFIER (volume)
+                   ├── *
+                   └── IDENTIFIER (scale)
+ASSIGNMENT
+├── IDENTIFIER (aud1)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (load)
+    └── ARGUMENTS
+        └── STRING
+            └── input1.wav
+ASSIGNMENT
+├── IDENTIFIER (louder_aud1)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (scaleVolume)
+    └── ARGUMENTS
+        ├── IDENTIFIER (aud1)
+        └── FLOAT (2.000000)
+ASSIGNMENT
+├── IDENTIFIER (fainter_aud1)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (scaleVolume)
+    └── ARGUMENTS
+        ├── IDENTIFIER (aud2)
+        └── FLOAT (0.500000)
+CALL_EXPRESSION
+├── FUNCTION
+│   IDENTIFIER (export)
+└── ARGUMENTS
+    ├── IDENTIFIER (louder_aud1)
+    └── STRING
+        └── louder_aud1.wav
+CALL_EXPRESSION
+├── FUNCTION
+│   IDENTIFIER (export)
+└── ARGUMENTS
+    ├── IDENTIFIER (fainter_aud1)
+    └── STRING
+        └── fainter_aud1.wav

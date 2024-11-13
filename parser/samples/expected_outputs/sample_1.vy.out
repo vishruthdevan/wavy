@@ -1,8 +1,66 @@
-parser has 7 error(s):
-expected next token to be RBRACKET, got COMMA instead at line 7, position 18
-no prefix parse function for COMMA found at line 7, position 22
-no prefix parse function for COMMA found at line 7, position 28
-no prefix parse function for RBRACKET found at line 8, position 4
-no prefix parse function for COMMA found at line 10, position 18
-expected next token to be RPR, got IDENTIFIER instead at line 10, position 18
-no prefix parse function for RPR found at line 10, position 20
+PROGRAM
+ASSIGNMENT
+├── IDENTIFIER (aud1)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (load)
+    └── ARGUMENTS
+        └── STRING
+            └── input1.wav
+ASSIGNMENT
+├── IDENTIFIER (aud2)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (load)
+    └── ARGUMENTS
+        └── STRING
+            └── input2.wav
+ASSIGNMENT
+├── IDENTIFIER (aud1)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (fadeIn)
+    └── ARGUMENTS
+        ├── IDENTIFIER (aud1)
+        └── FLOAT (3.000000)
+ASSIGNMENT
+├── IDENTIFIER (aud2)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (fadeOut)
+    └── ARGUMENTS
+        ├── IDENTIFIER (aud2)
+        └── FLOAT (3.000000)
+ASSIGNMENT
+├── IDENTIFIER (aud1)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (trim)
+    └── ARGUMENTS
+        ├── IDENTIFIER (aud1)
+        ├── FLOAT (5.000000)
+        └── FLOAT (30.000000)
+ASSIGNMENT
+├── IDENTIFIER (aud)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (trim)
+    └── ARGUMENTS
+        ├── IDENTIFIER (aud2)
+        ├── FLOAT (5.000000)
+        └── FLOAT (30.000000)
+ASSIGNMENT
+├── IDENTIFIER (res)
+├── =
+└── CALL_EXPRESSION
+    ├── FUNCTION
+    │   IDENTIFIER (join)
+    └── ARGUMENTS
+        ├── IDENTIFIER (aud1)
+        └── IDENTIFIER (aud2)

@@ -1,0 +1,4 @@
+parser has 3 error(s):
+no prefix parse function for LBRACE found at line 2, position 11
+no prefix parse function for RBRACE found at line 5, position 5
+expected next token to be RPR, got IDENTIFIER instead at line 7, position 12
