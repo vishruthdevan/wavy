@@ -1,0 +1,111 @@
+package vm
+
+import (
+	"fmt"
+	"testing"
+	"wavy/compiler"
+	"wavy/lexer"
+	"wavy/object"
+	"wavy/parser"
+)
+
+func parse(input string) *parser.Program {
+	l := lexer.Init(input)
+	p := parser.Init(l)
+	return p.ParseProgram()
+}
+func testIntegerObject(expected int64, actual object.Object) error {
+	result, ok := actual.(*object.Integer)
+	if !ok {
+		return fmt.Errorf("object is not Integer. got=%T (%+v)", actual, actual)
+	}
+	if result.Value != expected {
+		return fmt.Errorf("object has wrong value. got=%d, want=%d", result.Value, expected)
+	}
+	return nil
+}
+
+type vmTestCase struct {
+	input    string
+	expected interface{}
+}
+
+func runVmTests(t *testing.T, tests []vmTestCase) {
+	t.Helper()
+	for _, tt := range tests {
+		program := parse(tt.input)
+		comp := compiler.New()
+		err := comp.Compile(program)
+		if err != nil {
+			t.Fatalf("compiler error: %s", err)
+		}
+		vm := Init(comp.Bytecode())
+		err = vm.Run()
+		if err != nil {
+			t.Fatalf("vm error: %s", err)
+		}
+		stackElem := vm.LastPoppedStackElem()
+		testExpectedObject(t, tt.expected, stackElem)
+	}
+}
+
+func TestIntegerArithmetic(t *testing.T) {
+	tests := []vmTestCase{
+		{"1", 1}, {"2", 2}, {"1 + 2", 3},
+		{"-50 + 100 + -50", 0},
+	}
+	runVmTests(t, tests)
+}
+
+func TestBooleanExpressions(t *testing.T) {
+	tests := []vmTestCase{
+		{"true", true},
+		{"false", false},
+	}
+	runVmTests(t, tests)
+}
+
+func testExpectedObject(
+	t *testing.T,
+	expected interface{},
+	actual object.Object,
+) {
+	t.Helper()
+	switch expected := expected.(type) {
+	case int:
+		err := testIntegerObject(int64(expected), actual)
+		if err != nil {
+			t.Errorf("testIntegerObject failed: %s", err)
+		}
+
+	case bool:
+		err := testBooleanObject(bool(expected), actual)
+		if err != nil {
+			t.Errorf("testBooleanObject failed: %s", err)
+		}
+
+	case *object.Null:
+		if actual != Null {
+			t.Errorf("object is not Null: %T (%+v)", actual, actual)
+		}
+	}
+}
+
+func testBooleanObject(expected bool, actual object.Object) error {
+	result, ok := actual.(*object.Boolean)
+	if !ok {
+		return fmt.Errorf("object is not Boolean. got=%T (%+v)", actual, actual)
+	}
+	if result.Value != expected {
+		return fmt.Errorf("object has wrong value. got=%t, want=%t", result.Value, expected)
+	}
+	return nil
+}
+
+func TestConditionals(t *testing.T) {
+	tests := []vmTestCase{
+		{"if (true) { 10 } else { 20 }", 10},
+		{"if (false) {10}", Null},
+	}
+	runVmTests(t, tests)
+}
