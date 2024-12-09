@@ -11,21 +11,20 @@ import (
 	"wavy/lexer"
 )
 
-// func checkLexerErrors(t *testing.T, l *lexer.Lexer, output_file *os.File) {
-// 	errors := l.Errors()
-// 	if len(errors) == 0 {
-// 		return
-// 	}
-// 	fmt.Printf("lexer has %d error(s):\n", len(errors))
-// 	output_file.WriteString(fmt.Sprintf("lexer has %d error(s):\n", len(errors)))
-// 	for _, msg := range errors {
-// 		fmt.Println(msg)
-// 		output_file.WriteString(msg + "\n")
-// 	}
-// 	fmt.Print("\n==== Parser Output End ====\n\n")
-// 	t.FailNow()
-
-// }
+func checkLexerErrors(t *testing.T, l *lexer.Lexer, output_file *os.File) {
+	errors := l.Errors()
+	if len(errors) == 0 {
+		return
+	}
+	fmt.Printf("lexer has %d error(s):\n", len(errors))
+	output_file.WriteString(fmt.Sprintf("lexer has %d error(s):\n", len(errors)))
+	for _, msg := range errors {
+		fmt.Println(msg)
+		output_file.WriteString(msg + "\n")
+	}
+	fmt.Print("\n==== Parser Output End ====\n\n")
+	t.FailNow()
+}
 
 func checkParserErrors_(t *testing.T, p *Parser, output_file *os.File) {
 	errors := p.Errors()
@@ -78,7 +77,7 @@ func TestParserOutput(t *testing.T) {
 	fmt.Print("\n==== Parser Output Start ====\n\n")
 
 	program := p.ParseProgram()
-	// checkLexerErrors(t, l, output_file)
+	checkLexerErrors(t, l, output_file)
 	checkParserErrors_(t, p, output_file)
 
 	if program == nil {

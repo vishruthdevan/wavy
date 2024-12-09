@@ -1,12 +1,18 @@
 package lexer
 
-import "wavy/token"
+import (
+	"fmt"
+	"wavy/token"
+)
 
 type Lexer struct {
 	input        string
-	position     int  // current position in input (points to current char)
-	readPosition int  // current reading position in input (after current char)
-	ch           byte // current char under examination
+	position     int
+	Row          int
+	Column       int
+	readPosition int
+	ch           byte
+	errors       []string
 }
 
 func New(input string) *Lexer {
@@ -86,6 +92,7 @@ func (l *Lexer) NextToken() token.Token {
 			return tok
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
+			l.throwLexicalError(fmt.Sprintf("illegal character '%c'", l.ch))
 		}
 	}
 
@@ -107,6 +114,11 @@ func (l *Lexer) readChar() {
 	}
 	l.position = l.readPosition
 	l.readPosition += 1
+	l.Column += 1
+	if l.ch == '\n' {
+		l.Row += 1
+		l.Column = 0
+	}
 }
 
 func (l *Lexer) peekChar() byte {
@@ -119,8 +131,11 @@ func (l *Lexer) peekChar() byte {
 
 func (l *Lexer) readIdentifier() string {
 	position := l.position
-	for isLetter(l.ch) {
+	if isLetter(l.ch) {
 		l.readChar()
+		for isLetter(l.ch) || isDigit(l.ch) {
+			l.readChar()
+		}
 	}
 	return l.input[position:l.position]
 }
@@ -134,12 +149,23 @@ func (l *Lexer) readNumber() string {
 }
 
 func (l *Lexer) readString() string {
+	start := l.position
+	startCol := l.Column
+	startRow := l.Row
 	position := l.position + 1
 	for {
 		l.readChar()
-		if l.ch == '"' || l.ch == 0 {
+		if l.ch == '"' {
 			break
 		}
+		if l.ch == 0 {
+			l.position = start
+			l.Column = startCol
+			l.Row = startRow
+			l.throwLexicalError("unterminated string")
+			break
+		}
+
 	}
 	return l.input[position:l.position]
 }
@@ -154,4 +180,13 @@ func isDigit(ch byte) bool {
 
 func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
+}
+
+func (l *Lexer) throwLexicalError(message string) {
+	msg := fmt.Sprintf("%s at line %d, position %d", message, l.Row, l.Column)
+	l.errors = append(l.errors, msg)
+}
+
+func (l *Lexer) Errors() []string {
+	return l.errors
 }
