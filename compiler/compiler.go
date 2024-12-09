@@ -72,6 +72,12 @@ func (c *Compiler) Compile(node parser.Node) error {
 	case *parser.IntegerValue:
 		integer := &object.Integer{Value: node.Value}
 		c.emit(code.OpConstant, c.addConstant(integer))
+	case *parser.Boolean:
+		if node.Value {
+			c.emit(code.OpTrue)
+		} else {
+			c.emit(code.OpFalse)
+		}
 	}
 	return nil
 }
