@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"fmt"
 	"wavy/code"
 	"wavy/object"
 	"wavy/parser"
@@ -52,6 +53,13 @@ func (c *Compiler) Compile(node parser.Node) error {
 		err = c.Compile(node.Right)
 		if err != nil {
 			return err
+		}
+
+		switch node.Operator {
+		case "+":
+			c.emit(code.OpAdd)
+		default:
+			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
 	case *parser.IntegerValue:
 		integer := &object.Integer{Value: node.Value}
