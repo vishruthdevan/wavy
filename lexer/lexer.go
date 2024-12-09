@@ -1,235 +1,157 @@
 package lexer
 
-import (
-	"fmt"
-	"strings"
-)
+import "wavy/token"
 
 type Lexer struct {
 	input        string
-	position     int
-	Row          int
-	Column       int
-	nextPosition int
-	current      rune
-	errors       []string
+	position     int  // current position in input (points to current char)
+	readPosition int  // current reading position in input (after current char)
+	ch           byte // current char under examination
 }
 
-func Init(input string) *Lexer {
-	lexer := &Lexer{input: input, Row: 1, Column: 1, nextPosition: 0}
-	lexer.advance()
-	return lexer
+func New(input string) *Lexer {
+	l := &Lexer{input: input}
+	l.readChar()
+	return l
 }
 
-func (lexer *Lexer) Errors() []string {
-	return lexer.errors
-}
+func (l *Lexer) NextToken() token.Token {
+	var tok token.Token
 
-func (lexer *Lexer) advance() {
-	if lexer.nextPosition < len(lexer.input) {
-		lexer.current = rune(lexer.input[lexer.nextPosition])
-	} else {
-		lexer.current = 0
-	}
-	lexer.position = lexer.nextPosition
-	lexer.Column += 1
-	if lexer.current == '\n' {
-		lexer.Row += 1
-		lexer.Column = 0
-	}
-	lexer.nextPosition += 1
-}
+	l.skipWhitespace()
 
-func initToken(tokenType TokenType, ch rune) Token {
-	return Token{Type: tokenType, Value: string(ch)}
-}
-
-func (lexer *Lexer) NextToken() Token {
-	var t Token
-
-	for isWhitespace(lexer.current) {
-		lexer.advance()
-	}
-
-	switch lexer.current {
+	switch l.ch {
 	case '=':
-		if lexer.peek() == '=' {
-			current := lexer.current
-			lexer.advance()
-			t.Type = EQUALS
-			t.Value = string(current) + string(lexer.current)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{Type: token.EQ, Literal: literal}
 		} else {
-			t = initToken(ASSIGN, lexer.current)
-		}
-	case '!':
-		if lexer.peek() == '=' {
-			current := lexer.current
-			lexer.advance()
-			t.Type = NOT_EQUALS
-			t.Value = string(current) + string(lexer.current)
-		} else {
-			t = initToken(BANG, lexer.current)
+			tok = newToken(token.ASSIGN, l.ch)
 		}
 	case '+':
-		t = initToken(PLUS, lexer.current)
+		tok = newToken(token.PLUS, l.ch)
 	case '-':
-		t = initToken(MINUS, lexer.current)
-	case '*':
-		t = initToken(ASTERISK, lexer.current)
-	case '/':
-		t = initToken(SLASH, lexer.current)
-	case '<':
-		t = initToken(LT, lexer.current)
-	case '>':
-		t = initToken(GT, lexer.current)
-	case ',':
-		t = initToken(COMMA, lexer.current)
-	case ';':
-		t = initToken(SEMICOLON, lexer.current)
-	case ':':
-		t = initToken(COLON, lexer.current)
-	case '"':
-		t.Type = STRING
-		t.Value = lexer.readString()
-	case '\'':
-		t.Type = STRING
-		t.Value = lexer.readString()
-	case '(':
-		t = initToken(LPR, lexer.current)
-	case ')':
-		t = initToken(RPR, lexer.current)
-	case '{':
-		t = initToken(LBRACE, lexer.current)
-	case '}':
-		t = initToken(RBRACE, lexer.current)
-	case '[':
-		t = initToken(LBRACKET, lexer.current)
-	case ']':
-		t = initToken(RBRACKET, lexer.current)
-	case 0:
-		t.Type = EOF
-		t.Value = ""
-	default:
-		if isValidChar(lexer.current) {
-			t.Value = lexer.readWord()
-			t.Type = lookupKeyword(t.Value)
-			return t
-		} else if isDigit(lexer.current) {
-			t.Value = lexer.readNumber()
-			if strings.Contains(t.Value, ".") {
-				t.Type = FLOAT
-			} else {
-				t.Type = INTEGER
-			}
-			return t
+		tok = newToken(token.MINUS, l.ch)
+	case '!':
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{Type: token.NOT_EQ, Literal: literal}
 		} else {
-			t.Type = ILLEGAL
-			t.Value = string(lexer.current)
-			lexer.throwLexicalError("illegal character \"" + t.Value + "\"")
+			tok = newToken(token.BANG, l.ch)
+		}
+	case '/':
+		tok = newToken(token.SLASH, l.ch)
+	case '*':
+		tok = newToken(token.ASTERISK, l.ch)
+	case '<':
+		tok = newToken(token.LT, l.ch)
+	case '>':
+		tok = newToken(token.GT, l.ch)
+	case ';':
+		tok = newToken(token.SEMICOLON, l.ch)
+	case ':':
+		tok = newToken(token.COLON, l.ch)
+	case ',':
+		tok = newToken(token.COMMA, l.ch)
+	case '{':
+		tok = newToken(token.LBRACE, l.ch)
+	case '}':
+		tok = newToken(token.RBRACE, l.ch)
+	case '(':
+		tok = newToken(token.LPAREN, l.ch)
+	case ')':
+		tok = newToken(token.RPAREN, l.ch)
+	case '"':
+		tok.Type = token.STRING
+		tok.Literal = l.readString()
+	case '[':
+		tok = newToken(token.LBRACKET, l.ch)
+	case ']':
+		tok = newToken(token.RBRACKET, l.ch)
+	case 0:
+		tok.Literal = ""
+		tok.Type = token.EOF
+	default:
+		if isLetter(l.ch) {
+			tok.Literal = l.readIdentifier()
+			tok.Type = token.LookupIdent(tok.Literal)
+			return tok
+		} else if isDigit(l.ch) {
+			tok.Type = token.INT
+			tok.Literal = l.readNumber()
+			return tok
+		} else {
+			tok = newToken(token.ILLEGAL, l.ch)
 		}
 	}
-	lexer.advance()
-	return t
+
+	l.readChar()
+	return tok
 }
 
-func isValidChar(ch rune) bool {
-	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '$'
+func (l *Lexer) skipWhitespace() {
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		l.readChar()
+	}
 }
 
-func isDigit(ch rune) bool {
+func (l *Lexer) readChar() {
+	if l.readPosition >= len(l.input) {
+		l.ch = 0
+	} else {
+		l.ch = l.input[l.readPosition]
+	}
+	l.position = l.readPosition
+	l.readPosition += 1
+}
+
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
+}
+
+func (l *Lexer) readIdentifier() string {
+	position := l.position
+	for isLetter(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
+func (l *Lexer) readNumber() string {
+	position := l.position
+	for isDigit(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
+func (l *Lexer) readString() string {
+	position := l.position + 1
+	for {
+		l.readChar()
+		if l.ch == '"' || l.ch == 0 {
+			break
+		}
+	}
+	return l.input[position:l.position]
+}
+
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+func isDigit(ch byte) bool {
 	return '0' <= ch && ch <= '9'
 }
 
-func isWhitespace(ch rune) bool {
-	if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
-		return true
-	}
-	return false
-}
-
-func (lexer *Lexer) readWord() string {
-	start := lexer.position
-	for isValidChar(lexer.current) || isDigit(lexer.current) {
-		lexer.advance()
-	}
-	return lexer.input[start:lexer.position]
-}
-
-func (lexer *Lexer) readNumber() string {
-	start := lexer.position
-
-	for isDigit(lexer.current) {
-		lexer.advance()
-	}
-	if lexer.current == '.' {
-		lexer.advance()
-
-		if !isDigit(lexer.current) {
-			lexer.throwLexicalError("invalid number")
-		}
-
-		for isDigit(lexer.current) {
-			lexer.advance()
-		}
-	}
-	if lexer.current == '.' {
-		lexer.throwLexicalError("invalid number")
-	}
-
-	if isValidChar(lexer.current) {
-		lexer.throwLexicalError("invalid number")
-	}
-
-	return lexer.input[start:lexer.position]
-}
-
-func (lexer *Lexer) readString() string {
-	start := lexer.position
-	startColumn := lexer.Column
-	startRow := lexer.Row
-	if lexer.current == '"' {
-		lexer.advance()
-		for lexer.current != '"' {
-			lexer.advance()
-			if lexer.current == 0 {
-				lexer.Column = startColumn
-				lexer.Row = startRow
-				lexer.throwLexicalError("unterminated string")
-				break
-			}
-		}
-	}
-	if lexer.current == '\'' {
-		lexer.advance()
-		for lexer.current != '\'' {
-			lexer.advance()
-			if lexer.current == 0 {
-				lexer.Column = startColumn
-				lexer.Row = startRow
-				lexer.throwLexicalError("unterminated string")
-				break
-			}
-		}
-	}
-	return lexer.input[start+1 : lexer.position]
-}
-
-func lookupKeyword(word string) TokenType {
-	t, exists := keywords[word]
-	if exists {
-		return t
-	}
-	return IDENTIFIER
-}
-
-func (lexer *Lexer) peek() rune {
-	if lexer.nextPosition < len(lexer.input) {
-		return rune(lexer.input[lexer.nextPosition])
-	}
-	return 0
-}
-
-func (lexer *Lexer) throwLexicalError(message string) {
-	msg := fmt.Sprintf("%s at line %d, position %d", message, lexer.Row, lexer.Column)
-	lexer.errors = append(lexer.errors, msg)
+func newToken(tokenType token.TokenType, ch byte) token.Token {
+	return token.Token{Type: tokenType, Literal: string(ch)}
 }

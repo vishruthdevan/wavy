@@ -5,27 +5,33 @@ import (
 	"fmt"
 	"hash/fnv"
 	"strings"
-
+	"wavy/ast"
 	"wavy/code"
-	"wavy/lexer"
-	"wavy/parser"
 )
+
+type BuiltinFunction func(args ...Object) Object
 
 type ObjectType string
 
 const (
-	IntegerObj          = "Integer"
-	BooleanObj          = "Boolean"
-	NullObj             = "Null"
-	ReturnValueObj      = "ReturnValue"
-	ErrorObj            = "Error"
-	FunctionObj         = "Function"
-	StringObj           = "String"
-	BuiltinObj          = "Builtin"
-	ArrayObj            = "Array"
-	HashObj             = "Hash"
-	CompiledFunctionObj = "CompiledFunction"
-	ClosureObj          = "Closure"
+	NULL_OBJ  = "NULL"
+	ERROR_OBJ = "ERROR"
+
+	INTEGER_OBJ = "INTEGER"
+	BOOLEAN_OBJ = "BOOLEAN"
+	STRING_OBJ  = "STRING"
+
+	RETURN_VALUE_OBJ = "RETURN_VALUE"
+
+	FUNCTION_OBJ = "FUNCTION"
+	BUILTIN_OBJ  = "BUILTIN"
+
+	ARRAY_OBJ = "ARRAY"
+	HASH_OBJ  = "HASH"
+
+	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION_OBJ"
+
+	CLOSURE_OBJ = "CLOSURE"
 )
 
 type HashKey struct {
@@ -46,7 +52,7 @@ type Integer struct {
 	Value int64
 }
 
-func (i *Integer) Type() ObjectType { return IntegerObj }
+func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
 func (i *Integer) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
 func (i *Integer) HashKey() HashKey {
 	return HashKey{Type: i.Type(), Value: uint64(i.Value)}
@@ -56,7 +62,7 @@ type Boolean struct {
 	Value bool
 }
 
-func (b *Boolean) Type() ObjectType { return BooleanObj }
+func (b *Boolean) Type() ObjectType { return BOOLEAN_OBJ }
 func (b *Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
 func (b *Boolean) HashKey() HashKey {
 	var value uint64
@@ -72,34 +78,34 @@ func (b *Boolean) HashKey() HashKey {
 
 type Null struct{}
 
-func (n *Null) Type() ObjectType { return NullObj }
+func (n *Null) Type() ObjectType { return NULL_OBJ }
 func (n *Null) Inspect() string  { return "null" }
 
 type ReturnValue struct {
 	Value Object
 }
 
-func (rv *ReturnValue) Type() ObjectType { return ReturnValueObj }
+func (rv *ReturnValue) Type() ObjectType { return RETURN_VALUE_OBJ }
 func (rv *ReturnValue) Inspect() string  { return rv.Value.Inspect() }
 
 type Error struct {
 	Message string
 }
 
-func (e *Error) Type() ObjectType { return ErrorObj }
+func (e *Error) Type() ObjectType { return ERROR_OBJ }
 func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
 
 type Function struct {
-	Parameters []*parser.Identifier
-	Body       *parser.BlockStatement
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
 	Env        *Environment
 }
 
-func (f *Function) Type() ObjectType { return FunctionObj }
+func (f *Function) Type() ObjectType { return FUNCTION_OBJ }
 func (f *Function) Inspect() string {
 	var out bytes.Buffer
 
-	var params []string
+	params := []string{}
 	for _, p := range f.Parameters {
 		params = append(params, p.String())
 	}
@@ -118,7 +124,7 @@ type String struct {
 	Value string
 }
 
-func (s *String) Type() ObjectType { return StringObj }
+func (s *String) Type() ObjectType { return STRING_OBJ }
 func (s *String) Inspect() string  { return s.Value }
 func (s *String) HashKey() HashKey {
 	h := fnv.New64a()
@@ -127,24 +133,22 @@ func (s *String) HashKey() HashKey {
 	return HashKey{Type: s.Type(), Value: h.Sum64()}
 }
 
-type BuiltinFunction func(args ...Object) Object
-
 type Builtin struct {
 	Fn BuiltinFunction
 }
 
-func (b *Builtin) Type() ObjectType { return BuiltinObj }
+func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
 func (b *Builtin) Inspect() string  { return "builtin function" }
 
 type Array struct {
 	Elements []Object
 }
 
-func (ao *Array) Type() ObjectType { return ArrayObj }
+func (ao *Array) Type() ObjectType { return ARRAY_OBJ }
 func (ao *Array) Inspect() string {
 	var out bytes.Buffer
 
-	var elements []string
+	elements := []string{}
 	for _, e := range ao.Elements {
 		elements = append(elements, e.Inspect())
 	}
@@ -165,18 +169,19 @@ type Hash struct {
 	Pairs map[HashKey]HashPair
 }
 
-func (h *Hash) Type() ObjectType { return HashObj }
+func (h *Hash) Type() ObjectType { return HASH_OBJ }
 func (h *Hash) Inspect() string {
 	var out bytes.Buffer
 
-	var pairs []string
+	pairs := []string{}
 	for _, pair := range h.Pairs {
-		pairs = append(pairs, fmt.Sprintf("%s: %s", pair.Key.Inspect(), pair.Value.Inspect()))
+		pairs = append(pairs, fmt.Sprintf("%s: %s",
+			pair.Key.Inspect(), pair.Value.Inspect()))
 	}
 
-	out.WriteString(lexer.LBRACE)
-	out.WriteString(strings.Join(pairs, lexer.COMMA+" "))
-	out.WriteString(lexer.RBRACE)
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
 
 	return out.String()
 }
@@ -187,9 +192,9 @@ type CompiledFunction struct {
 	NumParameters int
 }
 
-func (cf *CompiledFunction) Type() ObjectType { return CompiledFunctionObj }
+func (cf *CompiledFunction) Type() ObjectType { return COMPILED_FUNCTION_OBJ }
 func (cf *CompiledFunction) Inspect() string {
-	return fmt.Sprintf("CopiledFunction[%p]", cf)
+	return fmt.Sprintf("CompiledFunction[%p]", cf)
 }
 
 type Closure struct {
@@ -197,8 +202,7 @@ type Closure struct {
 	Free []Object
 }
 
-func (c *Closure) Type() ObjectType { return ClosureObj }
-
+func (c *Closure) Type() ObjectType { return CLOSURE_OBJ }
 func (c *Closure) Inspect() string {
 	return fmt.Sprintf("Closure[%p]", c)
 }

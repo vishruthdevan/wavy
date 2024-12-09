@@ -11,23 +11,23 @@ import (
 	"wavy/lexer"
 )
 
-func checkLexerErrors(t *testing.T, l *lexer.Lexer, output_file *os.File) {
-	errors := l.Errors()
-	if len(errors) == 0 {
-		return
-	}
-	fmt.Printf("lexer has %d error(s):\n", len(errors))
-	output_file.WriteString(fmt.Sprintf("lexer has %d error(s):\n", len(errors)))
-	for _, msg := range errors {
-		fmt.Println(msg)
-		output_file.WriteString(msg + "\n")
-	}
-	fmt.Print("\n==== Parser Output End ====\n\n")
-	t.FailNow()
+// func checkLexerErrors(t *testing.T, l *lexer.Lexer, output_file *os.File) {
+// 	errors := l.Errors()
+// 	if len(errors) == 0 {
+// 		return
+// 	}
+// 	fmt.Printf("lexer has %d error(s):\n", len(errors))
+// 	output_file.WriteString(fmt.Sprintf("lexer has %d error(s):\n", len(errors)))
+// 	for _, msg := range errors {
+// 		fmt.Println(msg)
+// 		output_file.WriteString(msg + "\n")
+// 	}
+// 	fmt.Print("\n==== Parser Output End ====\n\n")
+// 	t.FailNow()
 
-}
+// }
 
-func checkParserErrors(t *testing.T, p *Parser, output_file *os.File) {
+func checkParserErrors_(t *testing.T, p *Parser, output_file *os.File) {
 	errors := p.Errors()
 	if len(errors) == 0 {
 		return
@@ -65,7 +65,7 @@ func TestParserOutput(t *testing.T) {
 		t.Fatalf("error reading file: %v", err)
 	}
 
-	l := lexer.Init(string(content))
+	l := lexer.New(string(content))
 
 	output_file, err := os.Create(filepath.Join(directory, fileName+".out"))
 	if err != nil {
@@ -73,21 +73,21 @@ func TestParserOutput(t *testing.T) {
 	}
 	defer output_file.Close()
 
-	p := Init(l)
+	p := New(l)
 
 	fmt.Print("\n==== Parser Output Start ====\n\n")
 
 	program := p.ParseProgram()
-	checkLexerErrors(t, l, output_file)
-	checkParserErrors(t, p, output_file)
+	// checkLexerErrors(t, l, output_file)
+	checkParserErrors_(t, p, output_file)
 
 	if program == nil {
 		log.Fatalf("error parsing program")
 	}
 
-	fmt.Println(program.Tree("", true))
+	// fmt.Println(program.Tree("", true))
 
-	output_file.WriteString(program.Tree("", true))
+	// output_file.WriteString(program.Tree("", true))
 
 	fmt.Print("\n==== Parser Output End ====\n\n")
 

@@ -2,21 +2,12 @@ package object
 
 import "fmt"
 
-const (
-	BuiltinFuncNameLen   = "len"
-	BuiltinFuncNameFirst = "first"
-	BuiltinFuncNameLast  = "last"
-	BuiltinFuncNameRest  = "rest"
-	BuiltinFuncNamePush  = "push"
-	BuiltinFuncNamePuts  = "puts"
-)
-
 var Builtins = []struct {
 	Name    string
 	Builtin *Builtin
 }{
 	{
-		BuiltinFuncNameLen,
+		"len",
 		&Builtin{Fn: func(args ...Object) Object {
 			if len(args) != 1 {
 				return newError("wrong number of arguments. got=%d, want=1",
@@ -29,14 +20,14 @@ var Builtins = []struct {
 			case *String:
 				return &Integer{Value: int64(len(arg.Value))}
 			default:
-				return newError("argument to %q not supported, got %s",
-					BuiltinFuncNameLen, args[0].Type())
+				return newError("argument to `len` not supported, got %s",
+					args[0].Type())
 			}
 		},
 		},
 	},
 	{
-		BuiltinFuncNamePuts,
+		"puts",
 		&Builtin{Fn: func(args ...Object) Object {
 			for _, arg := range args {
 				fmt.Println(arg.Inspect())
@@ -47,15 +38,15 @@ var Builtins = []struct {
 		},
 	},
 	{
-		BuiltinFuncNameFirst,
+		"first",
 		&Builtin{Fn: func(args ...Object) Object {
 			if len(args) != 1 {
 				return newError("wrong number of arguments. got=%d, want=1",
 					len(args))
 			}
-			if args[0].Type() != ArrayObj {
-				return newError("argument to %q must be %s, got %s",
-					BuiltinFuncNameFirst, ArrayObj, args[0].Type())
+			if args[0].Type() != ARRAY_OBJ {
+				return newError("argument to `first` must be ARRAY, got %s",
+					args[0].Type())
 			}
 
 			arr := args[0].(*Array)
@@ -68,15 +59,15 @@ var Builtins = []struct {
 		},
 	},
 	{
-		BuiltinFuncNameLast,
+		"last",
 		&Builtin{Fn: func(args ...Object) Object {
 			if len(args) != 1 {
 				return newError("wrong number of arguments. got=%d, want=1",
 					len(args))
 			}
-			if args[0].Type() != ArrayObj {
-				return newError("argument to %q must be %s, got %s",
-					BuiltinFuncNameLast, ArrayObj, args[0].Type())
+			if args[0].Type() != ARRAY_OBJ {
+				return newError("argument to `last` must be ARRAY, got %s",
+					args[0].Type())
 			}
 
 			arr := args[0].(*Array)
@@ -90,15 +81,15 @@ var Builtins = []struct {
 		},
 	},
 	{
-		BuiltinFuncNameRest,
+		"rest",
 		&Builtin{Fn: func(args ...Object) Object {
 			if len(args) != 1 {
 				return newError("wrong number of arguments. got=%d, want=1",
 					len(args))
 			}
-			if args[0].Type() != ArrayObj {
-				return newError("argument to %q must be %s, got %s",
-					BuiltinFuncNameRest, ArrayObj, args[0].Type())
+			if args[0].Type() != ARRAY_OBJ {
+				return newError("argument to `rest` must be ARRAY, got %s",
+					args[0].Type())
 			}
 
 			arr := args[0].(*Array)
@@ -114,15 +105,15 @@ var Builtins = []struct {
 		},
 	},
 	{
-		BuiltinFuncNamePush,
+		"push",
 		&Builtin{Fn: func(args ...Object) Object {
 			if len(args) != 2 {
 				return newError("wrong number of arguments. got=%d, want=2",
 					len(args))
 			}
-			if args[0].Type() != ArrayObj {
-				return newError("argument to %q must be %s, got %s",
-					BuiltinFuncNamePush, ArrayObj, args[0].Type())
+			if args[0].Type() != ARRAY_OBJ {
+				return newError("argument to `push` must be ARRAY, got %s",
+					args[0].Type())
 			}
 
 			arr := args[0].(*Array)

@@ -1,27 +1,28 @@
-package parser
+package ast
 
 import (
 	"testing"
-	"wavy/lexer"
+	"wavy/token"
 )
 
 func TestString(t *testing.T) {
 	program := &Program{
 		Statements: []Statement{
-			&AssignmentStatement{
+			&LetStatement{
+				Token: token.Token{Type: token.LET, Literal: "let"},
 				Name: &Identifier{
-					Token: lexer.Token{Type: lexer.IDENTIFIER, Value: "myVar"},
+					Token: token.Token{Type: token.IDENT, Literal: "myVar"},
 					Value: "myVar",
 				},
-				Operator: "=",
 				Value: &Identifier{
-					Token: lexer.Token{Type: lexer.IDENTIFIER, Value: "anotherVar"},
+					Token: token.Token{Type: token.IDENT, Literal: "anotherVar"},
 					Value: "anotherVar",
 				},
 			},
 		},
 	}
-	if program.String() != "myVar = anotherVar;" {
+
+	if program.String() != "let myVar = anotherVar;" {
 		t.Errorf("program.String() wrong. got=%q", program.String())
 	}
 }
