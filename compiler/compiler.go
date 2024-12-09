@@ -45,6 +45,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		if err != nil {
 			return err
 		}
+		c.emit(code.OpPop)
 	case *parser.InfixExpression:
 		err := c.Compile(node.Left)
 		if err != nil {
