@@ -59,9 +59,16 @@ func (c *Compiler) Compile(node parser.Node) error {
 		switch node.Operator {
 		case "+":
 			c.emit(code.OpAdd)
+		case "-":
+			c.emit(code.OpSub)
+		case "*":
+			c.emit(code.OpMul)
+		case "/":
+			c.emit(code.OpDiv)
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
+
 	case *parser.IntegerValue:
 		integer := &object.Integer{Value: node.Value}
 		c.emit(code.OpConstant, c.addConstant(integer))
