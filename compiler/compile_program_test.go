@@ -35,15 +35,15 @@ func TestCompilerOutput(t *testing.T) {
 	}
 
 	l := lexer.New(string(content))
+
+	p := parser.New(l)
+	program := p.ParseProgram()
+
 	if l.Errors() != nil {
 		for _, msg := range l.Errors() {
 			t.Fatalf("lexer error: %v", msg)
 		}
 	}
-
-	p := parser.New(l)
-	program := p.ParseProgram()
-
 	if p.Errors() != nil {
 		for _, msg := range p.Errors() {
 			t.Fatalf("parser error: %v", msg)
