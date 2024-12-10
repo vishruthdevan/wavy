@@ -62,6 +62,53 @@ A high-level programming language designed for the manipulation of audio files
 
 - sample_1.vy and sample_4.vy have been intentionally modified to make the parser identify errors.
 
+
+### Test the Compiler
+
+- Run the `test-compiler.sh` script:  
+
+   ```bash
+   ./test-compiler.sh /wavy/<path-to-sample-file.vy> 
+   ```
+
+- If you get a permission denied error while running the script, run the following command and try again:
+
+   ```bash
+   chmod 755 test-compiler.sh
+   ```
+
+- Example Usage:
+
+   ```bash
+   ./test-compiler.sh /wavy/compiler/samples/sample_1.vy
+   ```
+
+- The expected outputs are the `.out` files in the `compiler/samples/expected_outputs/` directory. Running the script will generate `.out` files in the same directory as the input file. For example, if `/wavy/compiler/samples/sample_1.vy` was the input, the output will be written to `/wavy/compiler/samples/sample_1.vy.out`.
+
+### Test the VM
+
+- Run the `test-vm.sh` script:  
+
+   ```bash
+   ./test-vm.sh /wavy/<path-to-sample-file.vy> 
+   ```
+
+- If you get a permission denied error while running the script, run the following command and try again:
+
+   ```bash
+   chmod 755 test-vm.sh
+   ```
+
+- Example Usage:
+
+   ```bash
+   ./test-vm.sh /wavy/vm/samples/sample_1.vy
+   ```
+
+- The expected outputs are the `.out` files in the `vm/samples/expected_outputs/` directory. Running the script will generate `.out` files in the same directory as the input file. For example, if `/wavy/vm/samples/sample_1.vy` was the input, the output will be written to `/wavy/vm/samples/sample_1.vy.out`.
+
+- sample_1.vy.incorrect has been intentionally modified to make the parser identify errors.
+
 ## Lexical Grammar Definition
 
 ### 1. Keywords (`KEYWORD`)
@@ -302,6 +349,38 @@ A string is a sequence of characters enclosed in double quotes (`"`) or single q
 - The Wavy programming language employs recursive descent parsing combined with Pratt parsing specifically for expression evaluation. This design choice leverages recursive descent parsing to provide a clear and modular approach to syntax analysis, where each grammar rule is represented by a function, enabling easy readability and maintainability of the parser. 
 - For expressions, Wavy uses Pratt parsing, which allows flexible handling of operator precedence and associativity, making it well-suited for parsing complex expressions efficiently. This hybrid approach ensures that Wavy's syntax and expression parsing are both intuitive and powerful, facilitating robust language processing.
 
-## Demo Video
+## Demo Video about Parsing
 
 URL: [https://youtu.be/WfligR-tuQg](https://youtu.be/WfligR-tuQg)
+
+## Compiler and VM Specification
+
+### Intermediate Representation (IR)
+
+- After the source code is parsed, the output is passed to the compiler, which generates an **Intermediate Representation (IR)** of the code. The IR consists of instructions formatted as:
+  - `<StackPosition> <OpCode> <Argument>`
+  - Example: `0025 OpConstant 10` or `0046 OpArray 13`.
+- Each instruction operates on a single argument, making the IR simple and optimizing-friendly.
+
+### Virtual Machine Execution
+
+- A **virtual machine (VM)** reads the IR instructions and processes them sequentially. It uses a virtual stack to evaluate each instruction, managing the call stack during execution.
+- The VM continues until all instructions are processed, and the stack returns to its initial state.
+
+### Variable Scoping
+
+- In the **Wavy programming language**, variables are scoped within braces `{}` and can only be accessed within the scope they are defined.
+- A **symbol table** is used to manage variables, and they are "popped" from the stack when their scope ends.
+
+### Error Handling
+
+- The compiler includes error handling to manage issues like:
+  - **Unknown operators**
+  - **Undefined variables**
+- These errors are detected during compilation and flagged accordingly.
+
+This structure ensures that the code is executed efficiently, supports variable scoping, and allows for optimized compilation processes.
+
+## Demo Video about Compiling
+
+URL: [https://youtu.be/yAqygMO68q8](https://youtu.be/yAqygMO68q8)
