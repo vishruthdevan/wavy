@@ -1,0 +1,29 @@
+0000 OpConstant 0
+0003 OpConstant 1
+0006 OpConstant 2
+0009 OpMinus
+0010 OpConstant 3
+0013 OpArray 4
+0016 OpSetGlobal 0
+0019 OpClosure 5 0
+0023 OpSetGlobal 1
+0026 OpGetGlobal 1
+0029 OpGetGlobal 0
+0032 OpConstant 6
+0035 OpIndex
+0036 OpCall 1
+0038 OpSetGlobal 2
+0041 OpGetGlobal 1
+0044 OpGetGlobal 0
+0047 OpConstant 7
+0050 OpIndex
+0051 OpCall 1
+0053 OpSetGlobal 3
+0056 OpGetBuiltin 1
+0058 OpGetGlobal 2
+0061 OpCall 1
+0063 OpPop
+0064 OpGetBuiltin 1
+0066 OpGetGlobal 3
+0069 OpCall 1
+0071 OpPop

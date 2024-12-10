@@ -76,6 +76,6 @@ func TestVMOutput(t *testing.T) {
 	fmt.Print("\n\n==== VM Output End ====\n\n")
 
 	// write to file
-	output_file.WriteString(comp.Bytecode().Instructions.String())
+	output_file.WriteString(vm.LastPoppedStackElem().Inspect())
 
 }

@@ -1,0 +1,12 @@
+0000 OpClosure 6 0
+0004 OpSetGlobal 0
+0007 OpGetBuiltin 1
+0009 OpGetGlobal 0
+0012 OpConstant 7
+0015 OpCall 1
+0017 OpCall 1
+0019 OpPop
+0020 OpGetGlobal 0
+0023 OpConstant 8
+0026 OpCall 1
+0028 OpPop
