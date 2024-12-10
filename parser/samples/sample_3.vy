@@ -1,8 +1,7 @@
-audio1 = load('audio1.wav')
-duration = 0.0
-for ( duration < 10.0) {
-    audio1 = loop(audio1, 1)
-    duration = getDuration(audio1)
-}
+let samples = [2, 4, -1, 5];
+let volumeBoost = fn(sample) { return sample * 10; };
 
-export(audio1, "looped_audio1.wav")
+let adjustedSample1 = volumeBoost(samples[0]);
+let adjustedSample2 = volumeBoost(samples[1]);
+puts(adjustedSample1);
+puts(adjustedSample2);

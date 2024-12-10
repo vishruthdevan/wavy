@@ -1,10 +1,16 @@
-aud1 = load("input1.wav")
-aud2 = load("input2.wav")
+let reverseString = fn(s, index) {
+    if (index < 0) {
+        "";
+    } else {
+        s[index] + reverseString(s, index - 1);
+    }
+};
 
-aud1 = fadeIn(aud1, 3.0)
-aud2 = fadeOut(aud2, 3.0)
+let original = ["W", "a", "v", "y", " ", "L", "a", "n", "g", "u", "a", "g", "e"];
+let reversed = reverseString(original, len(original) - 1);
 
-aud1 = trim(aud1, 5.0, 30.0)
-aud = trim(aud2, 5.0, 30.0)
-
-res = join(aud1, aud2)
+puts("Original: ");
+puts(original);
+puts("Reversed: ");
+puts(reversed);
+reversed;

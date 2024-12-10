@@ -1,11 +1,6 @@
-scaleVolume = function(volume, scale) {
-    return volume * scale
-}
+let track1 = [1, 3, 5];
+let track2 = [2, 1, -1];
 
-aud1 = load("input1.wav")
+let combined = [track1[0] + track2[0], track1[1] + track2[1], track1[2] + track2[2]];
 
-louder_aud1 = scaleVolume(aud1, 2.0)
-fainter_aud1 = scaleVolume(aud2, 0.5)
-
-export(louder_aud1, 'louder_aud1.wav')
-export(fainter_aud1, 'fainter_aud1.wav')
+puts(combined);

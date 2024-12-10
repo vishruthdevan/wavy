@@ -1,10 +1,15 @@
-audioFiles = ["input1.wav", "input2.wav", "input3.wav"]
-audioClips = []
+let fibonacci = fn(x) {
+    if (x == 0) {
+        return 0;
+    } else {
+        if (x == 1) {
+            return 1;
+        } else {
+            fibonacci(x - 1) + fibonacci(x - 2);
+        }
+    }
+};
 
-foreach file in audioFiles {
-    clip = load(file)
-    fadeIn(clip, 3.0)
-    append(audioClips, clip)
-}
+puts(fibonacci(15));
 
-total_duration = getDuration(audioClips[0]) + getDuration(audioClips[1]) + getDuration(audioClips[2])
+fibonacci(15)
